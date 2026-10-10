@@ -49,4 +49,6 @@ docs/metode.md               metodologia
 - **Equacions d'alçada, biomassa i carboni**: Beltran Barba, M. et al. (2023). *1r INF del Principat d'Andorra. Estimació de l'estoc i l'embornal de carboni total als boscos d'Andorra.* [doi:10.5281/zenodo.12519202](https://doi.org/10.5281/zenodo.12519202). CC BY-SA 4.0.
 - **Segon i Tercer Inventari Forestal Nacional**, província de Lleida. Ministerio para la Transición Ecológica y el Reto Demográfico, Banco de Datos de la Naturaleza.
 
-Les dades derivades de la BD-INF1-AND d'aquest repositori es distribueixen amb la mateixa llicència CC BY-SA 4.0.
+## Llicència
+
+El codi es distribueix amb llicència [MIT](LICENSE). Les dades de `data/` mantenen la llicència de la seva font: les derivades de la BD-INF1-AND, CC BY-SA 4.0; les derivades de l'IFN, reutilització amb citació del MITECO. El detall és a [data/LLICENCIES.md](data/LLICENCIES.md).
