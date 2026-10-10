@@ -208,7 +208,7 @@ with st.sidebar:
         opcions = pinars(resum, sp_filtre).sort_values("parcela")
         fila = st.selectbox(
             "Parcel·la", list(opcions.itertuples(index=False)), format_func=etiqueta_parcela_curta,
-            help="Pinars amb almenys un 70 % de l'àrea basimètrica de pi roig o pi negre.",
+            help="Pinedes amb almenys un 70 % de l'àrea basimètrica de pi roig o pi negre.",
         )
         codi_seleccionat = fila.parcela
         rodal = rodal_de_parcela(resum, arbres_inf, codi_seleccionat)
@@ -437,7 +437,7 @@ with tabs[2]:
                       font=dict(family=FONT))
     with st.container(border=True):
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False, "locale": "ca"})
-    st.caption(f"{len(mapa)} pinars del 1r INF d'Andorra (2022), acolorits pel CO₂ emmagatzemat"
+    st.caption(f"{len(mapa)} pinedes del 1r INF d'Andorra (2022), acolorits pel CO₂ emmagatzemat"
                + (". En blau, la parcel·la seleccionada." if not seleccionada.empty else "."))
 
 with tabs[3]:
@@ -506,7 +506,7 @@ with tabs[4]:
                              line=dict(color=GRIS_REFERENCIA, dash="dash")))
     fig.update_xaxes(title="AB observada a l'IFN3 (m²/ha)")
     with st.container(border=True):
-        st.plotly_chart(estil(fig, "Àrea basimètrica predita i observada", "Parcel·les de pinar de Lleida, 2001",
+        st.plotly_chart(estil(fig, "Àrea basimètrica predita i observada", "Parcel·les de pineda de Lleida, 2001",
                               "AB predita (m²/ha)"), width="stretch", config=CONFIG_GRAFIC)
 
     fig = go.Figure()

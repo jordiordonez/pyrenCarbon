@@ -29,7 +29,7 @@ Recull la mortalitat dels arbres petits i dominats i la dels grans i vells.
 
 ### Autoaclarida
 
-L'índex de densitat de Reineke, $SDI = N\,(D_q/25)^{1,605}$, no pot superar el percentil 99 observat a les parcel·les de pinar d'Andorra i de Lleida. Si el creixement el faria superar, moren els pins més prims fins a tornar-hi. Un rodal que ja parteix per sobre del màxim manté la seva densitat inicial com a límit.
+L'índex de densitat de Reineke, $SDI = N\,(D_q/25)^{1,605}$, no pot superar el percentil 99 observat a les parcel·les de pineda d'Andorra i de Lleida. Si el creixement el faria superar, moren els pins més prims fins a tornar-hi. Un rodal que ja parteix per sobre del màxim manté la seva densitat inicial com a límit.
 
 ### Aclarides
 
@@ -38,7 +38,7 @@ L'aclarida treu la fracció indicada de l'àrea basimètrica de pins: per baix (
 ### Validació
 
 - **Validació creuada per parcel·les** a Lleida: l'àrea basimètrica predita al cap d'11 anys té R² = 0,94–0,95 i un biaix d'entre −0,15 i −0,22 m²/ha. El nombre total de morts predit coincideix amb l'observat.
-- **Estoc a Andorra**: el carboni aeri mitjà de cada estrat de pinar queda a menys d'un 10 % del publicat a l'informe de l'INF1-AND.
+- **Estoc a Andorra**: el carboni aeri mitjà de cada estrat de pineda queda a menys d'un 10 % del publicat a l'informe de l'INF1-AND.
 - **Embornal**: l'informe de l'INF1-AND estima el creixement amb les equacions IAVC de l'IFN2, que no tenen en compte la competència. A les parcel·les de Lleida amb més de 40 m²/ha aquestes equacions sobreestimen el creixement observat en volum entre 2 i 2,4 vegades, mentre que aquest model s'hi ajusta amb un error de menys del ±8 % en totes les classes de densitat. Per això l'embornal que dona l'app per a les pinedes denses d'Andorra és més baix que el de l'informe.
 
 ### Limitacions
