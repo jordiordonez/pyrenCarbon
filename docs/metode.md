@@ -1,6 +1,6 @@
-### Esquema
+**En resum.** L'app simula cada pi de la parcel·la any a any: creix, pot morir i, si el rodal arriba a la densitat màxima, s'autoaclareix. Amb els diàmetres i les alçades de cada any calcula la biomassa i el carboni. Tot el model es basa en dades públiques.
 
-L'app simula cada pi de la parcel·la any a any: creix, pot morir i, si el rodal arriba a la densitat màxima, s'autoaclareix. Amb els diàmetres i les alçades de cada any calcula la biomassa i el carboni. Tot el model es basa en dades públiques.
+### Fonts
 
 | Peça | Font |
 |---|---|

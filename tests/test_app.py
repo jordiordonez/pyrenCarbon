@@ -9,12 +9,18 @@ def iniciar():
     return AppTest.from_file(APP, default_timeout=120).run()
 
 
+def text_markdown(at) -> str:
+    return "\n".join(m.value for m in at.markdown)
+
+
 def test_parcela_inf_amb_aclarida():
     at = iniciar()
     assert not at.exception
-    assert len(at.metric) == 4
-    assert at.metric[2].label == "Captació neta amb aclarida"
-    assert at.success or at.error
+    text = text_markdown(at)
+    assert "CO₂ emmagatzemat avui" in text
+    assert "amb aclarida" in text
+    assert "CO₂ retirat en l'aclarida" in text
+    assert "respecte de l'escenari sense aclarida" in text
 
 
 def test_canvi_de_parcela_i_tipus_d_aclarida():
@@ -32,7 +38,9 @@ def test_dades_de_rodal_sense_aclarida():
     assert not at.exception
     at.toggle[0].set_value(False).run()
     assert not at.exception
-    assert at.metric[2].label == "Carboni aeri avui"
+    text = text_markdown(at)
+    assert "Àrea basimètrica avui" in text
+    assert "CO₂ retirat" not in text
 
 
 def test_rodal_molt_dens_avisa_d_extrapolacio():
@@ -40,7 +48,8 @@ def test_rodal_molt_dens_avisa_d_extrapolacio():
     at.radio[0].set_value("Dades del rodal").run()
     at.number_input[2].set_value(85.0).run()
     assert not at.exception
-    assert any("extrapola" in w.value for w in at.warning)
+    assert "Projecció parcialment extrapolada" in text_markdown(at)
+    assert any("s'extrapola" in m.value for m in at.markdown)
 
 
 def test_inventari_csv_sense_fitxer_demana_fitxer():
