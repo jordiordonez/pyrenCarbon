@@ -64,7 +64,7 @@ TEXTURA = (
     "</g></svg>"
 )
 
-st.set_page_config(page_title="Carboni a les pinedes d'Andorra", page_icon="🌲", layout="wide")
+st.set_page_config(page_title="pyrenCarbon · Carboni a les pinedes d'Andorra", page_icon="🌲", layout="wide")
 st.markdown(
     f"""
     <style>
@@ -80,6 +80,7 @@ st.markdown(
     }}
     .capcalera .signatura strong {{color: #FFFFFF; font-weight: 600;}}
     .capcalera h1 {{color: #FFFFFF; font-size: 38px; line-height: 1.15; margin: 0 0 6px; padding: 0;}}
+    .capcalera .lema {{color: #FFFFFF; font-size: 22px; font-weight: 600; margin: 0 0 8px;}}
     .capcalera p {{color: #D7E5DC; font-size: 17px; margin: 0; max-width: 62ch;}}
     .context {{color: {GRIS}; font-size: 15px; margin: 4px 0 14px;}}
     .context strong {{color: {TINTA}; font-weight: 600;}}
@@ -181,7 +182,8 @@ st.markdown(
         <span><strong>Eina d'estimació de carboni forestal</strong></span>
         <span>Dades del 1r Inventari Nacional Forestal d'Andorra · Andorra Recerca + Innovació</span>
       </div>
-      <h1>Carboni a les pinedes d'Andorra</h1>
+      <h1>pyrenCarbon</h1>
+      <div class="lema">Carboni a les pinedes d'Andorra</div>
       <p>Explora l'estoc i la captació estimada de CO₂ de les pinedes de pi roig i pi negre,
       amb i sense una aclarida.</p>
     </div>
@@ -543,7 +545,7 @@ with tabs[5]:
 st.markdown(
     f"""
     <div class="peu">
-      Versió {VERSIO} · Estimacions orientatives; vegeu les limitacions a <em>Com funciona</em>.<br>
+      pyrenCarbon · versió {VERSIO} · <a href="https://github.com/jordiordonez/pyrenCarbon">codi font</a> · Estimacions orientatives; vegeu les limitacions a <em>Com funciona</em>.<br>
       Dades: 1r Inventari Nacional Forestal d'Andorra, BD-INF1-AND (Andorra Recerca + Innovació i CTFC, CC BY-SA 4.0);
       Segon i Tercer Inventari Forestal Nacional, província de Lleida (MITECO).
     </div>

@@ -1,6 +1,6 @@
-# 🌲 Carboni a les pinedes d'Andorra
+# pyrenCarbon
 
-Aplicació Streamlit per estimar l'estoc i la captació de CO₂ de les pinedes de **pi roig** (*Pinus sylvestris*) i **pi negre** (*Pinus uncinata*) d'Andorra, i l'efecte d'una aclarida, en un horitzó de fins a 80 anys.
+**Carboni a les pinedes d'Andorra.** Aplicació Streamlit per estimar l'estoc i la captació de CO₂ de les pinedes de **pi roig** (*Pinus sylvestris*) i **pi negre** (*Pinus uncinata*) d'Andorra, i l'efecte d'una aclarida, en un horitzó de fins a 80 anys.
 
 - **Punt de partida**: qualsevol pinar del 1r Inventari Nacional Forestal d'Andorra, unes dades de rodal (densitat i àrea basimètrica) o un inventari propi en CSV.
 - **Creixement arbre a arbre**: creixement diametral, mortalitat i autoaclarida calibrats amb 15.536 pins remesurats de l'Inventari Forestal Nacional a Lleida.
