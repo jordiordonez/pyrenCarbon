@@ -1,0 +1,5 @@
+-r requirements.txt
+statsmodels>=0.14
+scikit-learn>=1.5
+dbfread>=2.0
+pytest>=8.0

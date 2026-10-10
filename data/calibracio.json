@@ -1,0 +1,181 @@
+{
+  "exponent_reineke": 1.605,
+  "especies": {
+    "Pinus sylvestris": {
+      "creixement": {
+        "Intercept": 1.2236957499108152,
+        "lnd": 0.14813766150894775,
+        "dbh": -0.01730418261630149,
+        "bal_l": -0.045197259647678505,
+        "lnab": -0.1407579893369798,
+        "alt": 0.4009770788411367
+      },
+      "correccio_biaix": 1.0930627796017993,
+      "mortalitat": {
+        "Intercept": -6.70134931881076,
+        "inv_d": 8.183591049252259,
+        "dbh": 0.01725833753796972,
+        "bal": 0.03752056957468699
+      },
+      "sdi_max": 1162.2579555714171,
+      "sdi_p50_andorra": 854.2032134727576,
+      "sdi_p50_lleida": 371.04599395925953,
+      "n_parceles": 809,
+      "calibratge": {
+        "arbres": 9785,
+        "parceles": 739,
+        "morts": 521,
+        "altitud_min": 400.0,
+        "altitud_max": 2200.0,
+        "ab_max": 56.6952
+      },
+      "validacio": {
+        "creixement": {
+          "n": 9255,
+          "biaix": -3.790680069175953e-05,
+          "rmse": 0.16406818749040852,
+          "r2": 0.1789597341766208,
+          "mitjana_observada": 0.27220075634792
+        },
+        "mortalitat": {
+          "n": 9785,
+          "auc": 0.6083458474635267,
+          "morts_observats": 521,
+          "morts_predits": 520.2386945025958
+        },
+        "parceles": {
+          "n": 404,
+          "biaix": -0.2203561881188119,
+          "rmse": 2.999179955161176,
+          "r2": 0.9402276312519048,
+          "mitjana_observada": 20.940067574257426
+        },
+        "comparacio_informe": [
+          {
+            "ab_min": 0.0,
+            "ab_max": 20.0,
+            "arbres": 3832,
+            "model_sobre_observat": 0.9483408394293044,
+            "informe_sobre_observat": 1.0084445630385206
+          },
+          {
+            "ab_min": 20.0,
+            "ab_max": 30.0,
+            "arbres": 3040,
+            "model_sobre_observat": 0.947080087899421,
+            "informe_sobre_observat": 1.3010370527345045
+          },
+          {
+            "ab_min": 30.0,
+            "ab_max": 40.0,
+            "arbres": 1531,
+            "model_sobre_observat": 0.9795918866884628,
+            "informe_sobre_observat": 1.5996280970376735
+          },
+          {
+            "ab_min": 40.0,
+            "ab_max": 100.0,
+            "arbres": 861,
+            "model_sobre_observat": 1.0800178198553894,
+            "informe_sobre_observat": 2.0374756977243824
+          }
+        ],
+        "increment_ab_parceles": {
+          "n": 404,
+          "biaix": -0.2203561881188119,
+          "rmse": 2.999179955161176,
+          "r2": 0.35664730925001575,
+          "mitjana_observada": 4.502807920792079
+        }
+      }
+    },
+    "Pinus uncinata": {
+      "creixement": {
+        "Intercept": 2.2928490922332263,
+        "lnd": -0.15808662874161217,
+        "dbh": -0.005606301704557504,
+        "bal_l": -0.03574944790126192,
+        "lnab": -0.10890241154073992,
+        "alt": -0.06579046414487566
+      },
+      "correccio_biaix": 1.1222631570102612,
+      "mortalitat": {
+        "Intercept": -6.643326826396409,
+        "inv_d": 8.781663780225344,
+        "dbh": 0.03368704506471423,
+        "bal": 0.020975089042717606
+      },
+      "sdi_max": 1318.7094482860116,
+      "sdi_p50_andorra": 845.8387526301785,
+      "sdi_p50_lleida": 401.2401848516782,
+      "n_parceles": 453,
+      "calibratge": {
+        "arbres": 5751,
+        "parceles": 355,
+        "morts": 432,
+        "altitud_min": 900.0,
+        "altitud_max": 2400.0,
+        "ab_max": 58.0024
+      },
+      "validacio": {
+        "creixement": {
+          "n": 5302,
+          "biaix": 8.858071216297509e-05,
+          "rmse": 0.1464464383333794,
+          "r2": 0.142365716041028,
+          "mitjana_observada": 0.21303093172387783
+        },
+        "mortalitat": {
+          "n": 5751,
+          "auc": 0.5887552397763434,
+          "morts_observats": 432,
+          "morts_predits": 433.9295463681965
+        },
+        "parceles": {
+          "n": 249,
+          "biaix": -0.1535871485943777,
+          "rmse": 2.9172950371973396,
+          "r2": 0.9508875959684387,
+          "mitjana_observada": 21.537921285140563
+        },
+        "comparacio_informe": [
+          {
+            "ab_min": 0.0,
+            "ab_max": 20.0,
+            "arbres": 1667,
+            "model_sobre_observat": 0.9590539718931393,
+            "informe_sobre_observat": 1.3476159357349682
+          },
+          {
+            "ab_min": 20.0,
+            "ab_max": 30.0,
+            "arbres": 1531,
+            "model_sobre_observat": 0.9403673559416875,
+            "informe_sobre_observat": 1.6263567221589939
+          },
+          {
+            "ab_min": 30.0,
+            "ab_max": 40.0,
+            "arbres": 1186,
+            "model_sobre_observat": 1.0144115569270706,
+            "informe_sobre_observat": 2.0592764196164697
+          },
+          {
+            "ab_min": 40.0,
+            "ab_max": 100.0,
+            "arbres": 935,
+            "model_sobre_observat": 0.9896248178509436,
+            "informe_sobre_observat": 2.391019817508977
+          }
+        ],
+        "increment_ab_parceles": {
+          "n": 249,
+          "biaix": -0.15358714859437766,
+          "rmse": 2.9172950371973396,
+          "r2": 0.4094591289425712,
+          "mitjana_observada": 2.814282329317269
+        }
+      }
+    }
+  }
+}
