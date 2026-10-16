@@ -201,7 +201,8 @@ def estimar_pertorbacions(dades: pd.DataFrame) -> dict:
     - parceles_afectades: parcel·les on la causa mata almenys LLINDAR_AFECTADA de l'AB inicial.
     - taxa_episodis: parcel·les afectades / anys-parcel·la observats (taxa de Poisson); p_anual = 1 − e^(−taxa)
       és la probabilitat anual que una parcel·la sigui afectada.
-    - fraccio_mitjana i fraccio_mediana: fracció de l'AB inicial morta a les parcel·les afectades.
+    - fraccio_mitjana i fraccio_mediana: fracció de l'AB inicial morta a les parcel·les afectades; fraccions: totes
+      les fraccions observades (distribució empírica de la severitat, per a la banda d'incertesa de l'app).
     """
     u = unitats_parcela(dades)
     exposicio = float((u["g0"] * u["anys"]).sum())
@@ -219,6 +220,7 @@ def estimar_pertorbacions(dades: pd.DataFrame) -> dict:
             "p_anual": float(1.0 - np.exp(-taxa)),
             "fraccio_mitjana": float(fraccio[afectada].mean()) if afectada.any() else None,
             "fraccio_mediana": float(fraccio[afectada].median()) if afectada.any() else None,
+            "fraccions": sorted(round(float(x), 4) for x in fraccio[afectada]),
         }
     return {
         "parceles": int(len(u)),

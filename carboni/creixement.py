@@ -26,7 +26,7 @@ període.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 import numpy as np
@@ -64,6 +64,11 @@ EPISODIS = ("foc", "sequera", "neu_vent", "biotic")
 MODES_PERTORBACIO = {"cap": "Sense pertorbacions", "risc_mitja": "Risc mitjà", "episodi": "Episodi puntual"}
 # Amb menys parcel·les afectades, la severitat per defecte d'un episodi es pren de totes dues espècies juntes.
 MIN_PARCELES_SEVERITAT = 3
+# Cas pessimista de la banda d'incertesa: percentil de la pèrdua acumulada per pertorbacions en l'horitzó,
+# estimat amb una simulació Monte Carlo (nombre de rodals simulats i llavor fixa, perquè sigui reproduïble).
+QUANTIL_PESSIMISTA = 0.9
+SIMULACIONS_MC = 20_000
+LLAVOR_MC = 20261016
 
 
 def variables_arbre(arbres: pd.DataFrame) -> pd.DataFrame:
@@ -127,12 +132,14 @@ def carregar_models(ruta: Path) -> dict[str, ModelEspecie]:
 class Pertorbacio:
     """Escenari de pertorbacions. `taxa_anual`: fracció dels pins de cada espècie (codi) que mor cada any en el
     mode «risc_mitja»; `risc_mida`: per a les espècies que en tenen, coeficients del risc anual segons la mida
-    (cloglog), que substitueixen la taxa uniforme. `any_episodi` i `severitat` (fracció dels pins que mor): mode
+    (cloglog), que substitueixen la taxa uniforme; `escala`: multiplicador del risc anual de cada espècie (1 = risc
+    mitjà; més gran en el cas pessimista). `any_episodi` i `severitat` (fracció dels pins que mor): mode
     «episodi»."""
 
     mode: str = "cap"
     taxa_anual: dict[str, float] = field(default_factory=dict)
     risc_mida: dict[str, dict[str, float]] = field(default_factory=dict)
+    escala: dict[str, float] = field(default_factory=dict)
     tipus: str = ""
     any_episodi: int = 0
     severitat: float = 0.0
@@ -152,10 +159,12 @@ class Pertorbacio:
             for codi, taxa in self.taxa_anual.items():
                 idx = (sp == codi) & es_pi
                 coeficients = self.risc_mida.get(codi)
+                escala = self.escala.get(codi, 1.0)
                 if coeficients and idx.any():
-                    factor[idx] = np.exp(-np.exp(_predictor_lineal(coeficients, variables_arbre(arbres.loc[idx]))))
+                    risc = np.exp(_predictor_lineal(coeficients, variables_arbre(arbres.loc[idx])))
+                    factor[idx] = np.exp(-escala * risc)
                 else:
-                    factor[idx] = 1.0 - taxa
+                    factor[idx] = (1.0 - taxa) ** escala
         elif self.mode == "episodi" and any_ == self.any_episodi:
             factor[es_pi] = 1.0 - self.severitat
         return factor
@@ -179,10 +188,14 @@ def carregar_pertorbacions(ruta: Path) -> dict[str, dict]:
         for t, c in pert["causes"].items():
             propi = c["parceles_afectades"] >= MIN_PARCELES_SEVERITAT
             font = c if propi else conjunt[t]
-            tipus[t] = {"p_anual": c["p_anual"], "severitat": font["fraccio_mitjana"] or 0.0,
+            tipus[t] = {"p_anual": c["p_anual"], "taxa_episodis": c["taxa_episodis"],
+                        "severitat": font["fraccio_mitjana"] or 0.0, "fraccions": font.get("fraccions", []),
                         "parceles_afectades": font["parceles_afectades"], "severitat_conjunta": not propi}
         mida = pert.get("mida") or {}
-        resultat[codi_per_nom[nom]] = {"taxa_anual": pert["taxa_perdua_ab_total"], "tipus": tipus,
+        taxa = pert["taxa_perdua_ab_total"]
+        episodica = sum(t["taxa_episodis"] * np.mean(t["fraccions"]) for t in tipus.values() if t["fraccions"])
+        resultat[codi_per_nom[nom]] = {"taxa_anual": taxa, "tipus": tipus,
+                                       "taxa_cronica": max(0.0, taxa - episodica),
                                        "risc_mida": mida.get("coeficients") if mida.get("adoptat") else None}
     return resultat
 
@@ -190,6 +203,44 @@ def carregar_pertorbacions(ruta: Path) -> dict[str, dict]:
 def pertorbacio_risc_mitja(parametres: dict[str, dict]) -> Pertorbacio:
     return Pertorbacio("risc_mitja", taxa_anual={sp: p["taxa_anual"] for sp, p in parametres.items()},
                        risc_mida={sp: p["risc_mida"] for sp, p in parametres.items() if p.get("risc_mida")})
+
+
+def perdua_acumulada_mc(parametres_especie: dict, anys: int, n: int = SIMULACIONS_MC,
+                        llavor: int = LLAVOR_MC) -> np.ndarray:
+    """Fracció de l'AB de pins perduda per pertorbacions en `anys` anys a n rodals simulats (Monte Carlo).
+
+    Model: els episodis de cada tipus arriben com un procés de Poisson (taxa_episodis, episodis per rodal i any) i
+    cada episodi mata una fracció de l'AB presa a l'atzar de les observades a les parcel·les afectades de Lleida
+    (distribució empírica). A més, cada any es perd la part «crònica» de la taxa (morts aïllades, per sota del
+    llindar d'episodi), de manera que la pèrdua mitjana anual és la del risc mitjà."""
+    rng = np.random.default_rng(llavor)
+    log_supervivencia = np.full(n, anys * np.log1p(-parametres_especie["taxa_cronica"]))
+    for tipus in parametres_especie["tipus"].values():
+        fraccions = np.asarray(tipus["fraccions"], dtype=float)
+        if not len(fraccions) or anys <= 0:
+            continue
+        episodis = rng.poisson(tipus["taxa_episodis"] * anys, n)
+        severitat = np.minimum(rng.choice(fraccions, episodis.sum()), 1.0 - 1e-9)
+        log_supervivencia += np.bincount(np.repeat(np.arange(n), episodis), weights=np.log1p(-severitat),
+                                         minlength=n)
+    return 1.0 - np.exp(log_supervivencia)
+
+
+def escala_pessimista(parametres_especie: dict, anys: int, quantil: float = QUANTIL_PESSIMISTA) -> float:
+    """Multiplicador del risc anual mitjà perquè la pèrdua acumulada en `anys` anys sigui el percentil `quantil`
+    del Monte Carlo, repartida igual cada any. Mai per sota d'1: si en l'horitzó menys d'1 de cada 10 rodals pateix
+    un episodi, el percentil 90 és més baix que la mitjana i el cas pessimista es queda en el risc mitjà."""
+    if anys <= 0:
+        return 1.0
+    perdua = float(np.quantile(perdua_acumulada_mc(parametres_especie, anys), quantil))
+    risc_mitja = -np.log1p(-parametres_especie["taxa_anual"])
+    return max(1.0, -np.log1p(-perdua) / anys / risc_mitja)
+
+
+def pertorbacio_pessimista(parametres: dict[str, dict], anys: int) -> Pertorbacio:
+    """Risc mitjà amb el risc anual multiplicat perquè la pèrdua en l'horitzó sigui la del percentil 90."""
+    return replace(pertorbacio_risc_mitja(parametres),
+                   escala={sp: escala_pessimista(p, anys) for sp, p in parametres.items()})
 
 
 def pertorbacio_episodi(tipus: str, any_episodi: int, severitat: float) -> Pertorbacio:

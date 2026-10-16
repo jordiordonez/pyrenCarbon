@@ -11,7 +11,9 @@ from carboni.creixement import (
     Pertorbacio,
     carregar_models,
     carregar_pertorbacions,
+    perdua_acumulada_mc,
     pertorbacio_episodi,
+    pertorbacio_pessimista,
     pertorbacio_risc_mitja,
     sdi,
     simular,
@@ -212,3 +214,22 @@ def test_episodi_puntual(rodal_pu, models):
         pertorbacio_episodi("altres", 5, 0.5)
     with pytest.raises(ValueError):
         Pertorbacio("episodi", severitat=1.5)
+
+
+def test_monte_carlo_de_pertorbacions(pertorbacions):
+    """La pèrdua mitjana del Monte Carlo és la del risc mitjà; el percentil 90 és més alt a 30 anys; i la llavor
+    fixa el fa reproduïble."""
+    for sp, p in pertorbacions.items():
+        perdua = perdua_acumulada_mc(p, 30)
+        assert perdua.mean() == pytest.approx(1 - (1 - p["taxa_anual"]) ** 30, rel=0.05), sp
+        assert np.quantile(perdua, 0.9) > 2 * perdua.mean(), sp
+        np.testing.assert_array_equal(perdua, perdua_acumulada_mc(p, 30))
+
+
+def test_cas_pessimista(rodal_pu, models, pertorbacions):
+    risc = simular(rodal_pu, models, 30, pertorbacio_risc_mitja(pertorbacions)).serie
+    pessimista = pertorbacio_pessimista(pertorbacions, 30)
+    assert all(e > 1 for e in pessimista.escala.values())
+    assert simular(rodal_pu, models, 30, pessimista).serie["carboni"].iloc[-1] < risc["carboni"].iloc[-1]
+    # En horitzons curts, menys d'1 de cada 10 rodals pateix un episodi: el cas pessimista és el risc mitjà.
+    assert pertorbacio_pessimista(pertorbacions, 5).escala == {"Ps": 1.0, "Pu": 1.0}

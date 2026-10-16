@@ -76,9 +76,12 @@ def test_pertorbacions_tres_modes():
     radio = next(r for r in at.radio if r.label == "Escenari de pertorbacions")
     assert radio.value == "risc_mitja"
     assert "pertorbacions: risc mitjà" in text_markdown(at)
+    assert "Interval:" in text_markdown(at)
+    assert any("cas pessimista" in c.value for c in at.caption)
     radio.set_value("cap").run()
     assert not at.exception
     assert "pertorbacions: sense pertorbacions" in text_markdown(at)
+    assert "Interval:" not in text_markdown(at)
     next(r for r in at.radio if r.label == "Escenari de pertorbacions").set_value("episodi").run()
     assert not at.exception
     tipus = next(s for s in at.selectbox if s.label == "Tipus d'episodi")

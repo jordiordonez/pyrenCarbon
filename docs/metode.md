@@ -62,6 +62,20 @@ Els valors es desen al bloc `pertorbacions` de `data/calibracio.json`. L'app ofe
 - **Risc mitjà** (per defecte): cada any es perd, a més, la fracció d'AB que es va perdre de mitjana per pertorbacions (0,34 % al pi roig i 0,42 % al pi negre). Al pi roig, igual a totes les mides; al pi negre, amb un risc que creix amb el diàmetre (vegeu més avall). És determinista: representa l'esperança de moltes parcel·les, no una parcel·la concreta. Amb aquest escenari la mortalitat total del model és comparable a l'observada.
 - **Episodi puntual**: l'any triat mor una fracció dels pins de totes les mides (foc, sequera, neu o vent, plaga). Per defecte, la severitat mitjana del tipus a les parcel·les afectades de l'espècie; si l'espècie en té menys de tres, la de totes dues espècies juntes (foc 47 %, sequera 61 %). La resta d'anys, només la mortalitat de fons.
 
+#### Interval d'incertesa
+
+Amb el risc mitjà, l'app mostra també una franja per a cada escenari (sense aclarida i amb aclarida). El límit superior és l'escenari **sense pertorbacions**. El límit inferior és un **cas pessimista**: la pèrdua per pertorbacions en l'horitzó triat que només supera 1 de cada 10 rodals (percentil 90).
+
+Aquesta pèrdua es calcula amb una simulació Monte Carlo de 20.000 rodals per espècie (llavor fixa). Els episodis de cada tipus arriben a l'atzar (procés de Poisson) amb la freqüència observada (parcel·les afectades / anys-parcel·la), i cada episodi mata una fracció de l'AB presa a l'atzar de les observades a les parcel·les afectades de Lleida (de l'espècie; de totes dues si en té menys de tres). A més, cada any es perd la part de la taxa que no correspon a episodis (morts aïllades), de manera que la pèrdua mitjana del Monte Carlo és la del risc mitjà. El cas pessimista se simula com el risc mitjà amb el risc anual multiplicat perquè la pèrdua acumulada en l'horitzó sigui el percentil 90, repartida igual cada any; al pi negre es manté el repartiment entre mides.
+
+| Pèrdua d'AB per pertorbacions | Pi roig, 20 anys | Pi roig, 30 anys | Pi negre, 20 anys | Pi negre, 30 anys |
+|---|---|---|---|---|
+| Risc mitjà (esperança) | 6,6 % | 9,8 % | 8,1 % | 11,9 % |
+| Mediana dels rodals | 1,9 % | 2,8 % | 2,1 % | 3,1 % |
+| Cas pessimista (percentil 90) | 17,9 % | 25,8 % | 24,0 % | 32,0 % |
+
+La distribució és molt asimètrica: la majoria de rodals no pateixen cap episodi i perden menys que la mitjana, i uns pocs en perden molt. Si en l'horitzó triat menys d'1 de cada 10 rodals pateix un episodi (fins a 12 anys al pi roig i 8 al pi negre), el percentil 90 és més baix que la mitjana i el límit inferior es queda en el risc mitjà. La franja és la d'un rodal; la mitjana de molts rodals té molta menys incertesa.
+
 #### Risc segons la mida
 
 A les dades, els pins negres gruixuts moren més per pertorbacions que els prims. Per a cada espècie s'ha ajustat un model binomial cloglog de la probabilitat de morir per una pertorbació, amb la durada de l'interval com a *offset*, i s'ha comparat amb el model amb només constant, que equival al risc uniforme. Els pins morts de fons són el risc competidor i es tracten com a censurats, igual que es fa amb els morts per pertorbacions a la mortalitat de fons (comptar-los com a supervivents dona el mateix resultat). Com que les morts per pertorbacions van per episodis, agrupades per parcel·les, a més de la raó de versemblances (que suposa arbres independents) s'ha fet una prova de Wald amb errors robustos per parcel·la i s'ha mirat l'efecte del diàmetre dins de cada parcel·la afectada.

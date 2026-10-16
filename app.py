@@ -15,6 +15,7 @@ from carboni.creixement import (
     carregar_models,
     carregar_pertorbacions,
     pertorbacio_episodi,
+    pertorbacio_pessimista,
     pertorbacio_risc_mitja,
     simular,
 )
@@ -151,6 +152,8 @@ def simular_cache(arbres: pd.DataFrame, habitat: str, altitud: float, descripcio
     _, _, models, _, _, parametres = carregar()
     if mode_pert == "risc_mitja":
         pertorbacio = pertorbacio_risc_mitja(parametres)
+    elif mode_pert == "pessimista":
+        pertorbacio = pertorbacio_pessimista(parametres, anys)
     elif mode_pert == "episodi":
         pertorbacio = pertorbacio_episodi(tipus_pert, any_pert, severitat_pert)
     else:
@@ -195,6 +198,16 @@ def targeta(pregunta: str, xifra: str, unitat: str, detall: str, accent: str) ->
 
 def marca(color: str) -> str:
     return f'<span class="escenari" style="background:{color}"></span>'
+
+
+def transparent(color: str, opacitat: float) -> str:
+    r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
+    return f"rgba({r},{g},{b},{opacitat})"
+
+
+NOTA_BANDA = ("La franja va de l'escenari sense pertorbacions (a dalt) al cas pessimista (a baix): la pèrdua per "
+              "pertorbacions en l'horitzó triat que només supera 1 de cada 10 rodals (percentil 90 d'una simulació "
+              "Monte Carlo dels episodis observats al Pirineu de Lleida), repartida igual cada any.")
 
 
 # ---------- Capçalera ----------
@@ -288,7 +301,9 @@ with st.sidebar:
     elif mode_pert == "risc_mitja":
         st.caption(f"A més de la mortalitat de fons, cada any mor la fracció de pins que es va perdre de mitjana per "
                    f"pertorbacions al Pirineu de Lleida entre 1989 i 2016 ({taxes} de l'AB). Al pi "
-                   "negre, els pins gruixuts hi tenen més risc; al pi roig, totes les mides igual. És una mitjana: un rodal concret pot no patir-ne cap o patir-ne una de forta.")
+                   "negre, els pins gruixuts hi tenen més risc; al pi roig, totes les mides igual. És una mitjana: un rodal concret pot no patir-ne cap o patir-ne una de forta. "
+                   "Els resultats mostren també l'interval entre l'escenari sense pertorbacions i un cas pessimista "
+                   "(1 de cada 10 rodals).")
     else:
         tipus_pert = st.selectbox("Tipus d'episodi", list(EPISODIS), format_func=TIPUS_PERTORBACIO.get)
         any_pert = st.slider("Any de l'episodi", 1, anys, min(10, anys), step=1)
@@ -321,6 +336,24 @@ if amb_intervencio:
     rodal_aclarit, extrets = aclarir(rodal, tipus, pes / 100.0)
     sim_amb = simular_cache(rodal_aclarit.arbres, rodal_aclarit.habitat, rodal_aclarit.altitud,
                             rodal_aclarit.descripcio, anys, *parametres_simulacio)
+
+# Banda d'incertesa del risc mitjà: entre «sense pertorbacions» i el cas pessimista (percentil 90).
+banda, banda_amb = None, None
+if mode_pert == "risc_mitja":
+    def simular_banda(r: Rodal) -> tuple[pd.DataFrame, pd.DataFrame]:
+        return tuple(simular_cache(r.arbres, r.habitat, r.altitud, r.descripcio, anys, m, "", 0, 0.0).serie
+                     for m in ("cap", "pessimista"))
+
+    banda = simular_banda(rodal)
+    if sim_amb is not None:
+        banda_amb = simular_banda(rodal_aclarit)
+
+
+def interval_captacio(b: tuple[pd.DataFrame, pd.DataFrame] | None) -> str:
+    if b is None:
+        return ""
+    alta, baixa = (s["co2"].iloc[-1] - s["co2"].iloc[0] for s in b)
+    return f"<br>Interval: {fmt_signe(baixa)} a {fmt_signe(alta)} t CO₂/ha (cas pessimista – sense pertorbacions)"
 
 pins = rodal.arbres[rodal.arbres["sp"].isin(ESPECIES)]
 sp_dom = especie_dominant(rodal.arbres)
@@ -371,8 +404,8 @@ fila1[0].markdown(targeta(
 ), unsafe_allow_html=True)
 fila1[1].markdown(targeta(
     f"Captació estimada en {anys} anys · sense aclarida", fmt_signe(captacio), "t CO₂/ha",
-    f"{marca(VERD)}{fmt(captacio / anys, 1)} t CO₂/ha·any de mitjana · estoc final {fmt(serie['co2'].iloc[-1])} t CO₂/ha",
-    VERD,
+    f"{marca(VERD)}{fmt(captacio / anys, 1)} t CO₂/ha·any de mitjana · estoc final {fmt(serie['co2'].iloc[-1])} t CO₂/ha"
+    + interval_captacio(banda), VERD,
 ), unsafe_allow_html=True)
 
 if sim_amb is not None:
@@ -383,7 +416,8 @@ if sim_amb is not None:
     fila2 = st.columns(2, gap="medium")
     fila2[0].markdown(targeta(
         f"Captació estimada en {anys} anys · amb aclarida", fmt_signe(captacio_amb), "t CO₂/ha",
-        f"{marca(BLAU)}{fmt_signe(diferencia)} t CO₂/ha respecte de l'escenari sense aclarida", BLAU,
+        f"{marca(BLAU)}{fmt_signe(diferencia)} t CO₂/ha respecte de l'escenari sense aclarida"
+        + interval_captacio(banda_amb), BLAU,
     ), unsafe_allow_html=True)
     fila2[1].markdown(targeta(
         "CO₂ retirat en l'aclarida", fmt(co2_extret), "t CO₂/ha",
@@ -446,10 +480,20 @@ with tabs[0]:
     _, nom, unitats = VARIABLES[variable]
     inici = 1 if variable == "increment_brut" else 0
     fig = go.Figure()
-    traces = [(serie, SENSE, VERD, "circle")] + ([(sim_amb.serie, AMB, BLAU, "square")] if sim_amb else [])
-    for s, etiqueta, color, simbol in traces:
+    traces = [(serie, SENSE, VERD, "circle", banda)]
+    if sim_amb:
+        traces.append((sim_amb.serie, AMB, BLAU, "square", banda_amb))
+    for s, etiqueta, color, simbol, b in traces:
+        if b is not None:
+            for k, (sb, extrem) in enumerate(zip(b, ("sense pertorbacions", "cas pessimista"))):
+                fig.add_trace(go.Scatter(
+                    x=sb["any"][inici:], y=sb[variable][inici:], mode="lines", line=dict(width=0, color=color),
+                    fill="tonexty" if k else None, fillcolor=transparent(color, 0.14), legendgroup=etiqueta,
+                    name=f"{etiqueta}: interval", showlegend=bool(k),
+                    hovertemplate=f"{etiqueta}, {extrem}: %{{y:,.1f}} {unitats}<extra></extra>",
+                ))
         fig.add_trace(go.Scatter(
-            x=s["any"][inici:], y=s[variable][inici:], name=etiqueta, mode="lines+markers",
+            x=s["any"][inici:], y=s[variable][inici:], name=etiqueta, mode="lines+markers", legendgroup=etiqueta,
             line=dict(color=color, width=3), marker=dict(symbol=simbol, size=6, color=color),
             hovertemplate=f"{etiqueta}: %{{y:,.1f}} {unitats}<extra></extra>",
         ))
@@ -460,6 +504,8 @@ with tabs[0]:
         st.plotly_chart(estil(fig, f"Evolució estimada · {nom}",
                               f"{escenaris_text} · pertorbacions: {nom_pert} · horitzó {anys} anys",
                               unitats), width="stretch", config=CONFIG_GRAFIC)
+        if banda is not None:
+            st.caption(NOTA_BANDA)
 
 with tabs[1]:
     classes = np.arange(7.5, max(80.0, sim.arbres_finals["dbh"].max() + 5), 5.0)
