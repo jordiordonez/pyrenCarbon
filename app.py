@@ -287,8 +287,8 @@ with st.sidebar:
                    "no hi ha cap foc, sequera, nevada, ventada ni plaga.")
     elif mode_pert == "risc_mitja":
         st.caption(f"A més de la mortalitat de fons, cada any mor la fracció de pins que es va perdre de mitjana per "
-                   f"pertorbacions al Pirineu de Lleida entre 1989 i 2016 ({taxes} de l'AB), repartida entre "
-                   "totes les mides. És una mitjana: un rodal concret pot no patir-ne cap o patir-ne una de forta.")
+                   f"pertorbacions al Pirineu de Lleida entre 1989 i 2016 ({taxes} de l'AB). Al pi "
+                   "negre, els pins gruixuts hi tenen més risc; al pi roig, totes les mides igual. És una mitjana: un rodal concret pot no patir-ne cap o patir-ne una de forta.")
     else:
         tipus_pert = st.selectbox("Tipus d'episodi", list(EPISODIS), format_func=TIPUS_PERTORBACIO.get)
         any_pert = st.slider("Any de l'episodi", 1, anys, min(10, anys), step=1)

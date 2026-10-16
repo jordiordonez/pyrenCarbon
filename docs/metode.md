@@ -59,8 +59,37 @@ Les pertorbacions s'estimen a escala de parcel·la, amb tots dos períodes junts
 Els valors es desen al bloc `pertorbacions` de `data/calibracio.json`. L'app ofereix tres escenaris, que s'apliquen igual al rodal amb i sense aclarida:
 
 - **Sense pertorbacions**: només la mortalitat de fons. És una projecció optimista.
-- **Risc mitjà** (per defecte): cada any mor, a més, la fracció de pins que es va perdre de mitjana per pertorbacions (0,34 % o 0,42 % de l'AB segons l'espècie), igual a totes les mides. És determinista: representa l'esperança de moltes parcel·les, no una parcel·la concreta. Amb aquest escenari la mortalitat total del model és comparable a l'observada.
+- **Risc mitjà** (per defecte): cada any es perd, a més, la fracció d'AB que es va perdre de mitjana per pertorbacions (0,34 % al pi roig i 0,42 % al pi negre). Al pi roig, igual a totes les mides; al pi negre, amb un risc que creix amb el diàmetre (vegeu més avall). És determinista: representa l'esperança de moltes parcel·les, no una parcel·la concreta. Amb aquest escenari la mortalitat total del model és comparable a l'observada.
 - **Episodi puntual**: l'any triat mor una fracció dels pins de totes les mides (foc, sequera, neu o vent, plaga). Per defecte, la severitat mitjana del tipus a les parcel·les afectades de l'espècie; si l'espècie en té menys de tres, la de totes dues espècies juntes (foc 47 %, sequera 61 %). La resta d'anys, només la mortalitat de fons.
+
+#### Risc segons la mida
+
+A les dades, els pins negres gruixuts moren més per pertorbacions que els prims. Per a cada espècie s'ha ajustat un model binomial cloglog de la probabilitat de morir per una pertorbació, amb la durada de l'interval com a *offset*, i s'ha comparat amb el model amb només constant, que equival al risc uniforme. Els pins morts de fons són el risc competidor i es tracten com a censurats, igual que es fa amb els morts per pertorbacions a la mortalitat de fons (comptar-los com a supervivents dona el mateix resultat). Com que les morts per pertorbacions van per episodis, agrupades per parcel·les, a més de la raó de versemblances (que suposa arbres independents) s'ha fet una prova de Wald amb errors robustos per parcel·la i s'ha mirat l'efecte del diàmetre dins de cada parcel·la afectada.
+
+| | Pi negre | Pi roig |
+|---|---|---|
+| Raó de versemblances del diàmetre (1 gl) | 23,4 (p < 0,001) | 4,9 (p = 0,03) |
+| ΔAIC respecte del risc uniforme | −21,4 | −2,9 |
+| Wald robust per parcel·la | p < 0,001 | p = 0,39 |
+| Efecte dins de la parcel·la, per cm | +0,012 (p = 0,02) | −0,028 (p < 0,001) |
+| Per causa (robust) | biòtic +0,026 (p < 0,001); neu o vent +0,008 (p = 0,49) | cap de significatiu |
+
+Al pi negre el risc creix un 1,9 % per cada centímetre de diàmetre (×2,1 entre 10 i 50 cm), sobretot per les causes biòtiques; amb la neu i el vent la tendència va en el mateix sentit, però no és significativa. Afegir-hi el BAL, ln D o D² no millora clarament el model (ΔAIC ≤ 2 o pitjor). Al pi roig no hi ha un patró clar: el diàmetre sol no és significatiu amb errors robustos, dins de les parcel·les afectades moren més els pins prims i la relació té forma de U (més risc als prims i, pel foc, als gruixuts). Els models amb D² i BAL milloren l'AIC (ΔAIC −10 a −30), però empitjoren la validació creuada de les parcel·les (R² de l'increment d'AB de 0,177 a 0,168) i no milloren el calibratge dels pins gruixuts. Al pi roig es manté el risc uniforme.
+
+Mortalitat anual per pertorbacions per classes diamètriques (% d'arbres per any, validació creuada per parcel·les):
+
+| Pi negre, D (cm) | 7,5–15 | 15–25 | 25–35 | 35–45 | > 45 |
+|---|---|---|---|---|---|
+| Observada | 0,32 | 0,35 | 0,40 | 0,56 | 0,70 |
+| Risc uniforme | 0,41 | 0,41 | 0,41 | 0,41 | 0,41 |
+| Risc segons la mida | 0,29 | 0,34 | 0,40 | 0,48 | 0,64 |
+| Total (fons + pertorbacions) observada | 0,67 | 0,57 | 0,60 | 0,84 | 1,11 |
+| Total amb el risc uniforme | 0,74 | 0,67 | 0,65 | 0,64 | 0,81 |
+| Total amb el risc segons la mida | 0,62 | 0,59 | 0,64 | 0,71 | 1,04 |
+
+La validació creuada de les parcel·les de pineda de pi negre (307) millora una mica: AB final R² 0,934 → 0,935, RMSE 3,57 → 3,53 m²/ha, biaix −0,16 → −0,12 m²/ha; increment d'AB R² 0,32 → 0,33. Per això el risc segons la mida s'aplica al pi negre i no al pi roig. La constant es recalibra perquè, a les parcel·les de calibratge, la pèrdua d'AB esperada sigui la mateixa taxa observada (0,42 % anual): el model canvia el repartiment entre mides, no el total. En un rodal amb més pins gruixuts que la mitjana de calibratge la pèrdua és més alta, i al revés. Els coeficients són al bloc `pertorbacions.mida` de `calibracio.json`.
+
+L'episodi puntual es manté igual per a totes les mides: la severitat és la fracció d'AB que tria l'usuari, i dins de les parcel·les afectades l'efecte de la mida és petit.
 
 ### Autoaclarida
 
@@ -78,10 +107,10 @@ L'aclarida treu la fracció indicada de l'àrea basimètrica de pins: per baix (
 
 ### Limitacions
 
-- Les **pertorbacions** són una mitjana del Pirineu de Lleida entre 1989 i 2016, amb poques parcel·les cremades o afectades per sequera; no inclouen l'augment esperat amb el canvi climàtic. El risc mitjà és determinista i reparteix la mortalitat entre totes les mides; un episodi també mata la mateixa fracció de cada mida. A les dades, en canvi, la neu i les plagues maten més pins negres grossos: el model en subestima una mica la mortalitat.
+- Les **pertorbacions** són una mitjana del Pirineu de Lleida entre 1989 i 2016, amb poques parcel·les cremades o afectades per sequera; no inclouen l'augment esperat amb el canvi climàtic. El risc mitjà és determinista. Al pi negre el risc creix amb el diàmetre; al pi roig, i en els episodis puntuals, es reparteix igual entre totes les mides.
 - No hi ha **incorporació** de peus nous (regeneració), de manera que a llarg termini la captació de rodals oberts s'infravalora.
 - El creixement està calibrat al **Pirineu de Lleida (1989–2016)**: el terme de període només recull la diferència mitjana entre les dues remesures; no inclou l'efecte del canvi climàtic posterior ni diferències de qualitat d'estació pròpies d'Andorra. Quan hi hagi la remesura de l'INF-AND es podrà calibrar amb dades andorranes.
 - Les masses andorranes són més denses que les de calibratge; per sobre de l'àrea basimètrica màxima de Lleida el creixement s'extrapola i l'app ho avisa.
 - Les **altres espècies** del rodal compten per a la competència, però no creixen ni s'inclouen en el carboni.
 - El carboni de la **fusta extreta** es mostra a part: que torni o no a l'atmosfera depèn de l'ús que se'n faci.
-- La **captació neta** és la variació del carboni dels pins vius: els arbres que moren en surten, tot i que en realitat queden com a fusta morta i es descomponen lentament. Com que els pins negres més gruixuts tenen més mortalitat (de fons, un 0,46 % anual a partir de 45 cm; amb les pertorbacions, un 1,2 % a les dades), una aclarida per dalt n'evita les pèrdues i surt afavorida en captació neta. L'estoc en peu al final, l'estructura del rodal i la biodiversitat lligada als arbres grossos també compten a l'hora de decidir.
+- La **captació neta** és la variació del carboni dels pins vius: els arbres que moren en surten, tot i que en realitat queden com a fusta morta i es descomponen lentament. Com que els pins negres més gruixuts tenen més mortalitat (de fons, un 0,46 % anual a partir de 45 cm; amb les pertorbacions, un 1,1 % a les dades i un 1,0 % al model), una aclarida per dalt n'evita les pèrdues i surt afavorida en captació neta. L'estoc en peu al final, l'estructura del rodal i la biodiversitat lligada als arbres grossos també compten a l'hora de decidir.

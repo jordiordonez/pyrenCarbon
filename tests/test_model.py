@@ -169,9 +169,35 @@ def test_risc_mitja_mata_mes_que_sense_pertorbacions(rodal_pu, models, pertorbac
     assert sense["morts_peus"].sum() <= risc["morts_peus"].sum()
     assert (risc["morts_pertorbacio"].iloc[1:] > 0).all()
     assert risc["carboni"].iloc[-1] < sense["carboni"].iloc[-1]
-    # Sense autoaclarida, la pèrdua anual per pertorbacions és la taxa calibrada sobre els pins vius.
+
+
+def test_risc_mitja_uniforme_al_pi_roig(inf, models, pertorbacions):
+    """Al pi roig el risc és uniforme: la pèrdua anual és, com a molt, la taxa calibrada sobre els pins vius."""
+    resum, arbres = inf
+    codi = pinars(resum, "Ps").sort_values("parcela")["parcela"].iloc[0]
+    rodal = rodal_de_parcela(resum, arbres, codi)
+    assert pertorbacions["Ps"]["risc_mida"] is None
+    risc = simular(rodal, models, 20, pertorbacio_risc_mitja(pertorbacions)).serie
     densitat_previa = risc["densitat"].shift(1).iloc[1:]
-    assert (risc["morts_pertorbacio"].iloc[1:] <= densitat_previa * pertorbacions["Pu"]["taxa_anual"] + 1e-9).all()
+    assert (risc["morts_pertorbacio"].iloc[1:] <= densitat_previa * pertorbacions["Ps"]["taxa_anual"] + 1e-9).all()
+
+
+def test_risc_segons_la_mida_al_pi_negre(pertorbacions):
+    """Al pi negre el risc anual creix amb el diàmetre i, a les dades de calibratge, la pèrdua d'AB esperada és
+    la taxa observada (la constant està calibrada a la taxa)."""
+    coeficients = pertorbacions["Pu"]["risc_mida"]
+    assert coeficients["dbh"] > 0
+    pertorbacio = pertorbacio_risc_mitja(pertorbacions)
+    arbres = pd.DataFrame({"sp": ["Pu", "Pu", "Ps"], "dbh": [10.0, 50.0, 50.0], "f": 10.0, "altitud": 2000.0,
+                           "bal": 0.0, "ab": 30.0})
+    supervivencia = pertorbacio.supervivencia(1, arbres, np.array([True, True, True]))
+    assert supervivencia[1] < supervivencia[0] < 1.0
+    assert supervivencia[2] == pytest.approx(1.0 - pertorbacions["Ps"]["taxa_anual"])
+    lleida = pd.read_csv(DATA / "ifn_lleida_arbres.csv")
+    pu = lleida[lleida["especie"] == "Pinus uncinata"]
+    pes = np.pi * (pu["dbh"] / 200.0) ** 2 * pu["f"] * pu["anys"]
+    risc = np.exp(coeficients["Intercept"] + coeficients["dbh"] * pu["dbh"])
+    assert (pes * risc).sum() / pes.sum() == pytest.approx(pertorbacions["Pu"]["taxa_anual"], rel=0.01)
 
 
 def test_episodi_puntual(rodal_pu, models):

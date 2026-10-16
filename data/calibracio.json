@@ -179,6 +179,120 @@
             "taxa_perdua_ab_total": 0.0036475867784053584,
             "taxa_perdua_ab_fons_observada": 0.002472664397273527
           }
+        },
+        "mida": {
+          "adoptat": false,
+          "formula": "y ~ dbh",
+          "coeficients": null,
+          "tractament_morts_fons": "censurats (risc competidor)",
+          "arbres": 11232,
+          "morts_pertorbacio": 509,
+          "aic_constant": 4142.004399703971,
+          "alternatives": {
+            "D": {
+              "formula": "y ~ dbh",
+              "lr": 4.899957874174106,
+              "gl": 1,
+              "p": 0.026857350663159574,
+              "aic": 4139.104441829797,
+              "delta_aic": -2.899957874174106,
+              "coeficients": {
+                "Intercept": -5.341606727139093,
+                "dbh": -0.010111811693424833
+              },
+              "p_wald_robust": 0.39128665579197186
+            },
+            "ln D": {
+              "formula": "y ~ lnd",
+              "lr": 7.657074047348033,
+              "gl": 1,
+              "p": 0.0056550142496386065,
+              "aic": 4136.347325656623,
+              "delta_aic": -5.657074047348033,
+              "coeficients": {
+                "Intercept": -4.644898600253576,
+                "lnd": -0.3033419995854356
+              },
+              "p_wald_robust": 0.21050812441268538
+            },
+            "D + D²": {
+              "formula": "y ~ dbh + d2",
+              "lr": 13.707617315278185,
+              "gl": 2,
+              "p": 0.001055428263308239,
+              "aic": 4132.296782388693,
+              "delta_aic": -9.707617315278185,
+              "coeficients": {
+                "Intercept": -4.809860494739787,
+                "dbh": -0.051849868294747276,
+                "d2": 0.06919289477047842
+              },
+              "p_wald_robust": 0.025849408244042762
+            },
+            "D + BAL": {
+              "formula": "y ~ dbh + bal",
+              "lr": 29.46075998174001,
+              "gl": 2,
+              "p": 4.005689237969987e-07,
+              "aic": 4116.543639722231,
+              "delta_aic": -25.46075998174001,
+              "coeficients": {
+                "Intercept": -5.935178639314737,
+                "dbh": 0.001115016719406262,
+                "bal": 0.02142689921524738
+              },
+              "p_wald_robust": 0.001868594491008112
+            },
+            "D + D² + BAL": {
+              "formula": "y ~ dbh + d2 + bal",
+              "lr": 35.82576808032536,
+              "gl": 3,
+              "p": 8.151217109365198e-08,
+              "aic": 4112.178631623646,
+              "delta_aic": -29.82576808032536,
+              "coeficients": {
+                "Intercept": -5.453961698093479,
+                "dbh": -0.034754771284378004,
+                "d2": 0.05803739906938635,
+                "bal": 0.020466582379929814
+              },
+              "p_wald_robust": 0.0006902499707382222
+            }
+          },
+          "per_causa": {
+            "neu_vent": {
+              "morts": 148,
+              "coef_dbh": -0.018817335865107067,
+              "lr": 4.665028056321717,
+              "p": 0.030782920487322774,
+              "ee_robust": 0.013053356332839168,
+              "p_robust": 0.14942352257245772
+            },
+            "biotic": {
+              "morts": 249,
+              "coef_dbh": -0.02450724557527118,
+              "lr": 12.798775283061332,
+              "p": 0.0003468463373532454,
+              "ee_robust": 0.012842801956053694,
+              "p_robust": 0.05635922643815843
+            },
+            "altres": {
+              "morts": 44,
+              "coef_dbh": -0.020811030837084646,
+              "lr": 1.6726452754974162,
+              "p": 0.19590459594186677,
+              "ee_robust": 0.02138069010091675,
+              "p_robust": 0.3303762168233596
+            }
+          },
+          "intra_parcela": {
+            "unitats": 178,
+            "arbres": 4297,
+            "coef_dbh": -0.02826270935589114,
+            "ee": 0.006280648592225167,
+            "lr": 21.732527742089587,
+            "p": 3.134314655765175e-06
+          }
         }
       },
       "periode": {
@@ -434,6 +548,84 @@
           "r2": 0.17667194281091958,
           "mitjana_observada": 4.066711261261261
         },
+        "risc_uniforme": {
+          "parceles": {
+            "n": 444,
+            "biaix": -0.06680202702702699,
+            "rmse": 3.91365575805922,
+            "r2": 0.9156017777076646,
+            "mitjana_observada": 23.25852882882883
+          },
+          "increment_ab_parceles": {
+            "n": 444,
+            "biaix": -0.06680202702702699,
+            "rmse": 3.9136557580592206,
+            "r2": 0.17667194281091958,
+            "mitjana_observada": 4.066711261261261
+          }
+        },
+        "calibratge_pertorbacio_mida": [
+          {
+            "dbh_min": 7.5,
+            "dbh_max": 15.0,
+            "arbres": 1911,
+            "morts_pertorbacio": 111,
+            "observada": 0.4727830309225658,
+            "uniforme": 0.3328435987367542,
+            "model": 0.3328435987367542,
+            "total_observada": 0.8987136894113639,
+            "total_uniforme": 0.7712032348354998,
+            "total_model": 0.7712032348354998
+          },
+          {
+            "dbh_min": 15.0,
+            "dbh_max": 25.0,
+            "arbres": 4729,
+            "morts_pertorbacio": 204,
+            "observada": 0.3487417943107221,
+            "uniforme": 0.3347985332786581,
+            "model": 0.3347985332786581,
+            "total_observada": 0.5624316192560175,
+            "total_uniforme": 0.5626006523833446,
+            "total_model": 0.5626006523833446
+          },
+          {
+            "dbh_min": 25.0,
+            "dbh_max": 35.0,
+            "arbres": 3436,
+            "morts_pertorbacio": 140,
+            "observada": 0.32730163183242156,
+            "uniforme": 0.33732716078873204,
+            "model": 0.33732716078873204,
+            "total_observada": 0.4675737597606022,
+            "total_uniforme": 0.5003707453158847,
+            "total_model": 0.5003707453158847
+          },
+          {
+            "dbh_min": 35.0,
+            "dbh_max": 45.0,
+            "arbres": 909,
+            "morts_pertorbacio": 28,
+            "observada": 0.24680475980608196,
+            "uniforme": 0.33865247758024636,
+            "model": 0.33865247758024636,
+            "total_observada": 0.3966505068312032,
+            "total_uniforme": 0.47350328054826296,
+            "total_model": 0.47350328054826296
+          },
+          {
+            "dbh_min": 45.0,
+            "dbh_max": 200.0,
+            "arbres": 547,
+            "morts_pertorbacio": 26,
+            "observada": 0.3810640480726953,
+            "uniforme": 0.33668626325514567,
+            "model": 0.33668626325514567,
+            "total_observada": 0.5569397625677854,
+            "total_uniforme": 0.48068225991731234,
+            "total_model": 0.48068225991731234
+          }
+        ],
         "nomes_fons": {
           "parceles": {
             "n": 444,
@@ -591,6 +783,84 @@
               "r2": 0.27384611650288104,
               "mitjana_observada": 4.14299397993311
             },
+            "risc_uniforme": {
+              "parceles": {
+                "n": 299,
+                "biaix": -0.07069933110367903,
+                "rmse": 2.931445674094477,
+                "r2": 0.9442147564066022,
+                "mitjana_observada": 21.24072508361204
+              },
+              "increment_ab_parceles": {
+                "n": 299,
+                "biaix": -0.07069933110367903,
+                "rmse": 2.931445674094477,
+                "r2": 0.27384611650288104,
+                "mitjana_observada": 4.14299397993311
+              }
+            },
+            "calibratge_pertorbacio_mida": [
+              {
+                "dbh_min": 7.5,
+                "dbh_max": 15.0,
+                "arbres": 1269,
+                "morts_pertorbacio": 67,
+                "observada": 0.45230540741240804,
+                "uniforme": 0.33252437740312385,
+                "model": 0.33252437740312385,
+                "total_observada": 0.8168500641328563,
+                "total_uniforme": 0.6785630447354317,
+                "total_model": 0.6785630447354317
+              },
+              {
+                "dbh_min": 15.0,
+                "dbh_max": 25.0,
+                "arbres": 2926,
+                "morts_pertorbacio": 124,
+                "observada": 0.36282771535580527,
+                "uniforme": 0.3349224764722988,
+                "model": 0.3349224764722988,
+                "total_observada": 0.5237593632958801,
+                "total_uniforme": 0.5191624539483811,
+                "total_model": 0.5191624539483811
+              },
+              {
+                "dbh_min": 25.0,
+                "dbh_max": 35.0,
+                "arbres": 1963,
+                "morts_pertorbacio": 75,
+                "observada": 0.3273822515168711,
+                "uniforme": 0.33740069051869,
+                "model": 0.33740069051869,
+                "total_observada": 0.419049281941595,
+                "total_uniforme": 0.4712113827264586,
+                "total_model": 0.4712113827264586
+              },
+              {
+                "dbh_min": 35.0,
+                "dbh_max": 45.0,
+                "arbres": 498,
+                "morts_pertorbacio": 10,
+                "observada": 0.17196904557179707,
+                "uniforme": 0.338764513974698,
+                "model": 0.338764513974698,
+                "total_observada": 0.34393809114359414,
+                "total_uniforme": 0.4538425869821442,
+                "total_model": 0.4538425869821442
+              },
+              {
+                "dbh_min": 45.0,
+                "dbh_max": 200.0,
+                "arbres": 315,
+                "morts_pertorbacio": 7,
+                "observada": 0.18959913326110509,
+                "uniforme": 0.3373861153560032,
+                "model": 0.3373861153560032,
+                "total_observada": 0.4333694474539545,
+                "total_uniforme": 0.46563696473242566,
+                "total_model": 0.46563696473242566
+              }
+            ],
             "nomes_fons": {
               "parceles": {
                 "n": 299,
@@ -748,6 +1018,84 @@
               "r2": 0.1028354055823748,
               "mitjana_observada": 3.909411034482758
             },
+            "risc_uniforme": {
+              "parceles": {
+                "n": 145,
+                "biaix": -0.05876551724137907,
+                "rmse": 5.401913243440251,
+                "r2": 0.862582757925266,
+                "mitjana_observada": 27.419379310344826
+              },
+              "increment_ab_parceles": {
+                "n": 145,
+                "biaix": -0.05876551724137907,
+                "rmse": 5.401913243440251,
+                "r2": 0.1028354055823748,
+                "mitjana_observada": 3.909411034482758
+              }
+            },
+            "calibratge_pertorbacio_mida": [
+              {
+                "dbh_min": 7.5,
+                "dbh_max": 15.0,
+                "arbres": 642,
+                "morts_pertorbacio": 44,
+                "observada": 0.5077899596076169,
+                "uniforme": 0.3333893143299529,
+                "model": 0.3333893143299529,
+                "total_observada": 1.03866128101558,
+                "total_uniforme": 0.9295735909754081,
+                "total_model": 0.9295735909754081
+              },
+              {
+                "dbh_min": 15.0,
+                "dbh_max": 25.0,
+                "arbres": 1803,
+                "morts_pertorbacio": 80,
+                "observada": 0.32894736842105265,
+                "uniforme": 0.33462436047496286,
+                "model": 0.33462436047496286,
+                "total_observada": 0.6167763157894737,
+                "total_uniforme": 0.6236427522893192,
+                "total_model": 0.6236427522893192
+              },
+              {
+                "dbh_min": 25.0,
+                "dbh_max": 35.0,
+                "arbres": 1473,
+                "morts_pertorbacio": 65,
+                "observada": 0.32720865844450037,
+                "uniforme": 0.33724236377974115,
+                "model": 0.33724236377974115,
+                "total_observada": 0.5235338535112006,
+                "total_uniforme": 0.5339983233456436,
+                "total_model": 0.5339983233456436
+              },
+              {
+                "dbh_min": 35.0,
+                "dbh_max": 45.0,
+                "arbres": 411,
+                "morts_pertorbacio": 18,
+                "observada": 0.325497287522604,
+                "uniforme": 0.33853466715823255,
+                "model": 0.33853466715823255,
+                "total_observada": 0.45207956600361665,
+                "total_uniforme": 0.4941772286652577,
+                "total_model": 0.4941772286652577
+              },
+              {
+                "dbh_min": 45.0,
+                "dbh_max": 200.0,
+                "arbres": 232,
+                "morts_pertorbacio": 19,
+                "observada": 0.6068348770360907,
+                "uniforme": 0.33586101446678207,
+                "model": 0.33586101446678207,
+                "total_observada": 0.7026509102523155,
+                "total_uniforme": 0.4984233106431512,
+                "total_model": 0.4984233106431512
+              }
+            ],
             "nomes_fons": {
               "parceles": {
                 "n": 145,
@@ -900,6 +1248,123 @@
             "anys_parcela": 2271.0,
             "taxa_perdua_ab_total": 0.003805371274092856,
             "taxa_perdua_ab_fons_observada": 0.002840281972166478
+          }
+        },
+        "mida": {
+          "adoptat": true,
+          "formula": "y ~ dbh",
+          "coeficients": {
+            "Intercept": -6.043485118076011,
+            "dbh": 0.018773884852520347
+          },
+          "tractament_morts_fons": "censurats (risc competidor)",
+          "arbres": 7802,
+          "morts_pertorbacio": 406,
+          "aic_constant": 3189.428968830557,
+          "alternatives": {
+            "D": {
+              "formula": "y ~ dbh",
+              "lr": 23.369157819011434,
+              "gl": 1,
+              "p": 1.337051984161189e-06,
+              "aic": 3168.0598110115457,
+              "delta_aic": -21.369157819011434,
+              "coeficients": {
+                "Intercept": -5.962257614112765,
+                "dbh": 0.018773884852520347
+              },
+              "p_wald_robust": 0.00028044568783292033
+            },
+            "ln D": {
+              "formula": "y ~ lnd",
+              "lr": 19.981560507108952,
+              "gl": 1,
+              "p": 7.819258205260508e-06,
+              "aic": 3171.447408323448,
+              "delta_aic": -17.981560507108952,
+              "coeficients": {
+                "Intercept": -7.123786038297214,
+                "lnd": 0.521152076223429
+              },
+              "p_wald_robust": 0.002851327096645498
+            },
+            "D + D²": {
+              "formula": "y ~ dbh + d2",
+              "lr": 23.571504258404275,
+              "gl": 2,
+              "p": 7.612247236661533e-06,
+              "aic": 3169.857464572153,
+              "delta_aic": -19.571504258404275,
+              "coeficients": {
+                "Intercept": -6.034364944324374,
+                "dbh": 0.023249901774195413,
+                "d2": -0.00560000034558338
+              },
+              "p_wald_robust": 0.00214722897288788
+            },
+            "D + BAL": {
+              "formula": "y ~ dbh + bal",
+              "lr": 27.37111326424565,
+              "gl": 2,
+              "p": 1.1387759139738763e-06,
+              "aic": 3166.0578555663114,
+              "delta_aic": -23.37111326424565,
+              "coeficients": {
+                "Intercept": -6.226242406622285,
+                "dbh": 0.022800364963604568,
+                "bal": 0.009511219842720698
+              },
+              "p_wald_robust": 0.000829526616536471
+            },
+            "D + D² + BAL": {
+              "formula": "y ~ dbh + d2 + bal",
+              "lr": 28.092976469678433,
+              "gl": 3,
+              "p": 3.472433543883115e-06,
+              "aic": 3167.3359923608787,
+              "delta_aic": -22.092976469678433,
+              "coeficients": {
+                "Intercept": -6.389303301865173,
+                "dbh": 0.03178051214604121,
+                "d2": -0.010659319609782808,
+                "bal": 0.010318698814522895
+              },
+              "p_wald_robust": 0.006312132807478006
+            }
+          },
+          "per_causa": {
+            "neu_vent": {
+              "morts": 158,
+              "coef_dbh": 0.007830349628924168,
+              "lr": 1.3786771984530333,
+              "p": 0.2403265970930016,
+              "ee_robust": 0.0113082766736696,
+              "p_robust": 0.48865847018314335
+            },
+            "biotic": {
+              "morts": 185,
+              "coef_dbh": 0.025619228306073393,
+              "lr": 22.36851309258509,
+              "p": 2.2503327930406755e-06,
+              "ee_robust": 0.005511958269778403,
+              "p_robust": 3.3527318049821612e-06
+            },
+            "altres": {
+              "morts": 60,
+              "coef_dbh": 0.010372604905548725,
+              "lr": 0.95007624661298,
+              "p": 0.3296998901543714,
+              "ee_robust": 0.013135949368445489,
+              "p_robust": 0.42974098289696905
+            }
+          },
+          "intra_parcela": {
+            "unitats": 155,
+            "arbres": 3865,
+            "coef_dbh": 0.011557301760297147,
+            "ee": 0.004866299386175464,
+            "lr": 5.435544587814093,
+            "p": 0.019730937314223332
           }
         }
       },
@@ -1143,18 +1608,96 @@
         },
         "parceles": {
           "n": 307,
-          "biaix": -0.15704267100977193,
-          "rmse": 3.56964161644691,
-          "r2": 0.9340101027634177,
+          "biaix": -0.11901889250814335,
+          "rmse": 3.5349246452445073,
+          "r2": 0.935287446015431,
           "mitjana_observada": 23.747898697068404
         },
         "increment_ab_parceles": {
           "n": 307,
-          "biaix": -0.15704267100977193,
-          "rmse": 3.56964161644691,
-          "r2": 0.31965889904878286,
+          "biaix": -0.11901889250814335,
+          "rmse": 3.5349246452445073,
+          "r2": 0.33282802266859635,
           "mitjana_observada": 2.77338664495114
         },
+        "risc_uniforme": {
+          "parceles": {
+            "n": 307,
+            "biaix": -0.15704267100977193,
+            "rmse": 3.56964161644691,
+            "r2": 0.9340101027634177,
+            "mitjana_observada": 23.747898697068404
+          },
+          "increment_ab_parceles": {
+            "n": 307,
+            "biaix": -0.15704267100977193,
+            "rmse": 3.56964161644691,
+            "r2": 0.31965889904878286,
+            "mitjana_observada": 2.77338664495114
+          }
+        },
+        "calibratge_pertorbacio_mida": [
+          {
+            "dbh_min": 7.5,
+            "dbh_max": 15.0,
+            "arbres": 1334,
+            "morts_pertorbacio": 53,
+            "observada": 0.31956587277660536,
+            "uniforme": 0.40992217707361445,
+            "model": 0.2922056054613158,
+            "total_observada": 0.6692794694000603,
+            "total_uniforme": 0.7372744619336453,
+            "total_model": 0.6195578903213467
+          },
+          {
+            "dbh_min": 15.0,
+            "dbh_max": 25.0,
+            "arbres": 2972,
+            "morts_pertorbacio": 129,
+            "observada": 0.348563862844173,
+            "uniforme": 0.41267604793475965,
+            "model": 0.3404440081887497,
+            "total_observada": 0.5701315896133373,
+            "total_uniforme": 0.6656342467018658,
+            "total_model": 0.5934022069558559
+          },
+          {
+            "dbh_min": 25.0,
+            "dbh_max": 35.0,
+            "arbres": 2376,
+            "morts_pertorbacio": 119,
+            "observada": 0.3999327844059822,
+            "uniforme": 0.413641333804556,
+            "model": 0.4010106859422686,
+            "total_observada": 0.5948580070576374,
+            "total_uniforme": 0.6490339489118443,
+            "total_model": 0.6364033010495568
+          },
+          {
+            "dbh_min": 35.0,
+            "dbh_max": 45.0,
+            "arbres": 820,
+            "morts_pertorbacio": 57,
+            "observada": 0.5546365670915637,
+            "uniforme": 0.41313478949458815,
+            "model": 0.4838348420089659,
+            "total_observada": 0.8368200836820083,
+            "total_uniforme": 0.6435405770686994,
+            "total_model": 0.7142406295830772
+          },
+          {
+            "dbh_min": 45.0,
+            "dbh_max": 200.0,
+            "arbres": 549,
+            "morts_pertorbacio": 48,
+            "observada": 0.6989951944080385,
+            "uniforme": 0.41522800885886324,
+            "model": 0.6431545970279731,
+            "total_observada": 1.1067423911460608,
+            "total_uniforme": 0.8129504778428849,
+            "total_model": 1.0408770660119948
+          }
+        ],
         "nomes_fons": {
           "parceles": {
             "n": 307,
@@ -1300,18 +1843,96 @@
             },
             "parceles": {
               "n": 200,
-              "biaix": 0.06722749999999998,
-              "rmse": 3.0173185213613096,
-              "r2": 0.9499528955276417,
+              "biaix": 0.1167045,
+              "rmse": 3.011316238515975,
+              "r2": 0.9501518126046321,
               "mitjana_observada": 21.485660499999998
             },
             "increment_ab_parceles": {
               "n": 200,
-              "biaix": 0.06722749999999998,
-              "rmse": 3.0173185213613096,
-              "r2": 0.32160144139880076,
+              "biaix": 0.1167045,
+              "rmse": 3.011316238515975,
+              "r2": 0.32429780235182915,
               "mitjana_observada": 2.6109259999999996
             },
+            "risc_uniforme": {
+              "parceles": {
+                "n": 200,
+                "biaix": 0.06722749999999998,
+                "rmse": 3.0173185213613096,
+                "r2": 0.9499528955276417,
+                "mitjana_observada": 21.485660499999998
+              },
+              "increment_ab_parceles": {
+                "n": 200,
+                "biaix": 0.06722749999999998,
+                "rmse": 3.0173185213613096,
+                "r2": 0.32160144139880076,
+                "mitjana_observada": 2.6109259999999996
+              }
+            },
+            "calibratge_pertorbacio_mida": [
+              {
+                "dbh_min": 7.5,
+                "dbh_max": 15.0,
+                "arbres": 819,
+                "morts_pertorbacio": 41,
+                "observada": 0.4246944271804433,
+                "uniforme": 0.41129694635053127,
+                "model": 0.2925064779820321,
+                "total_observada": 0.7665216490573855,
+                "total_uniforme": 0.7198254715113598,
+                "total_model": 0.6010350031428606
+              },
+              {
+                "dbh_min": 15.0,
+                "dbh_max": 25.0,
+                "arbres": 1803,
+                "morts_pertorbacio": 83,
+                "observada": 0.38965306793108306,
+                "uniforme": 0.41308681045649953,
+                "model": 0.33955256646365883,
+                "total_observada": 0.5727430637059293,
+                "total_uniforme": 0.6438571073642744,
+                "total_model": 0.5703228633714337
+              },
+              {
+                "dbh_min": 25.0,
+                "dbh_max": 35.0,
+                "arbres": 1332,
+                "morts_pertorbacio": 62,
+                "observada": 0.39392591651312026,
+                "uniforme": 0.4140538735135944,
+                "model": 0.4011193499954953,
+                "total_observada": 0.5845352309549526,
+                "total_uniforme": 0.6283947087298015,
+                "total_model": 0.6154601852117025
+              },
+              {
+                "dbh_min": 35.0,
+                "dbh_max": 45.0,
+                "arbres": 445,
+                "morts_pertorbacio": 30,
+                "observada": 0.5743825387708213,
+                "uniforme": 0.4141032449242417,
+                "model": 0.4850419045446853,
+                "total_observada": 0.80413555427915,
+                "total_uniforme": 0.6351256176163516,
+                "total_model": 0.7060642772367953
+              },
+              {
+                "dbh_min": 45.0,
+                "dbh_max": 200.0,
+                "arbres": 306,
+                "morts_pertorbacio": 31,
+                "observada": 0.8620689655172413,
+                "uniforme": 0.41572842896604384,
+                "model": 0.6426445915345566,
+                "total_observada": 1.3070077864293659,
+                "total_uniforme": 0.7718100995058732,
+                "total_model": 0.9987262620743861
+              }
+            ],
             "nomes_fons": {
               "parceles": {
                 "n": 200,
@@ -1457,18 +2078,96 @@
             },
             "parceles": {
               "n": 107,
-              "biaix": -0.5762392523364485,
-              "rmse": 4.420699566134154,
-              "r2": 0.8952428313569891,
+              "biaix": -0.5596233644859815,
+              "rmse": 4.347705832169894,
+              "r2": 0.8986737304975596,
               "mitjana_observada": 27.97638130841121
             },
             "increment_ab_parceles": {
               "n": 107,
-              "biaix": -0.5762392523364485,
-              "rmse": 4.420699566134154,
-              "r2": 0.3145722894463375,
+              "biaix": -0.5596233644859815,
+              "rmse": 4.347705832169894,
+              "r2": 0.33702071348761353,
               "mitjana_observada": 3.077051401869158
             },
+            "risc_uniforme": {
+              "parceles": {
+                "n": 107,
+                "biaix": -0.5762392523364485,
+                "rmse": 4.420699566134154,
+                "r2": 0.8952428313569891,
+                "mitjana_observada": 27.97638130841121
+              },
+              "increment_ab_parceles": {
+                "n": 107,
+                "biaix": -0.5762392523364485,
+                "rmse": 4.420699566134154,
+                "r2": 0.3145722894463375,
+                "mitjana_observada": 3.077051401869158
+              }
+            },
+            "calibratge_pertorbacio_mida": [
+              {
+                "dbh_min": 7.5,
+                "dbh_max": 15.0,
+                "arbres": 515,
+                "morts_pertorbacio": 12,
+                "observada": 0.17313518972731207,
+                "uniforme": 0.4080072986146107,
+                "model": 0.2917865283707091,
+                "total_observada": 0.5338335016592123,
+                "total_uniforme": 0.761578682614174,
+                "total_model": 0.6453579123702724
+              },
+              {
+                "dbh_min": 15.0,
+                "dbh_max": 25.0,
+                "arbres": 1169,
+                "morts_pertorbacio": 46,
+                "observada": 0.2928444104914693,
+                "uniforme": 0.4121190290605822,
+                "model": 0.34165285719474414,
+                "total_observada": 0.5665902724726254,
+                "total_uniforme": 0.6951653674702664,
+                "total_model": 0.6246991956044282
+              },
+              {
+                "dbh_min": 25.0,
+                "dbh_max": 35.0,
+                "arbres": 1044,
+                "morts_pertorbacio": 57,
+                "observada": 0.4066780821917808,
+                "uniforme": 0.4131780802029182,
+                "model": 0.4008886637152614,
+                "total_observada": 0.6064497716894978,
+                "total_uniforme": 0.672210390209302,
+                "total_model": 0.6599209737216453
+              },
+              {
+                "dbh_min": 35.0,
+                "dbh_max": 45.0,
+                "arbres": 375,
+                "morts_pertorbacio": 27,
+                "observada": 0.5342303126236644,
+                "uniforme": 0.4121339500191073,
+                "model": 0.48258741667773075,
+                "total_observada": 0.8705975464978235,
+                "total_uniforme": 0.6522369231746771,
+                "total_model": 0.7226903898333007
+              },
+              {
+                "dbh_min": 45.0,
+                "dbh_max": 200.0,
+                "arbres": 243,
+                "morts_pertorbacio": 17,
+                "observada": 0.5197187404463467,
+                "uniforme": 0.41467786801342715,
+                "model": 0.643715275644398,
+                "total_observada": 0.8865790278202385,
+                "total_uniforme": 0.8581784816643139,
+                "total_model": 1.0872158892952848
+              }
+            ],
             "nomes_fons": {
               "parceles": {
                 "n": 107,

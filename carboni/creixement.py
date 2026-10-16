@@ -9,7 +9,10 @@ Cada any:
 3. pertorbacions (foc, sequera, neu i vent, plagues…), segons l'escenari triat (Pertorbacio):
    - sense pertorbacions: només la mortalitat de fons;
    - risc mitjà: cada any es perd la fracció de pins que es va perdre de mitjana per pertorbacions a les
-     parcel·les de calibratge (taxa_perdua_ab_total de calibracio.json), igual per a totes les mides;
+     parcel·les de calibratge (taxa_perdua_ab_total de calibracio.json). Al pi roig és igual per a totes les
+     mides; al pi negre, el risc anual de cada pi creix amb el diàmetre (GLM cloglog, bloc «mida» de
+     calibracio.json), amb la constant calibrada perquè la pèrdua d'AB a les parcel·les de calibratge sigui la
+     mateixa taxa;
    - episodi puntual: l'any indicat mor una fracció (severitat) dels pins de totes les mides;
 4. autoaclarida: si l'índex de densitat de Reineke supera el màxim observat, moren els pins més petits.
 
@@ -41,6 +44,8 @@ from carboni.inventari import Rodal, factor_alcada_local
 
 FORMULA_CREIXEMENT = "y ~ lnd + dbh + bal_l + lnab + alt"
 FORMULA_MORTALITAT = "m ~ inv_d + dbh + bal"
+# Risc anual de mort per pertorbacions segons la mida (espècies on s'ha adoptat; scripts/calibrar.py).
+FORMULA_PERTORBACIO_MIDA = "y ~ dbh"
 # Terme de període del calibratge (1 = IFN3–IFN4) i període que fan servir les prediccions.
 TERME_PERIODE = "p34"
 PERIODE_REFERENCIA = "IFN3-IFN4"
@@ -121,10 +126,13 @@ def carregar_models(ruta: Path) -> dict[str, ModelEspecie]:
 @dataclass(frozen=True)
 class Pertorbacio:
     """Escenari de pertorbacions. `taxa_anual`: fracció dels pins de cada espècie (codi) que mor cada any en el
-    mode «risc_mitja». `any_episodi` i `severitat` (fracció dels pins que mor): mode «episodi»."""
+    mode «risc_mitja»; `risc_mida`: per a les espècies que en tenen, coeficients del risc anual segons la mida
+    (cloglog), que substitueixen la taxa uniforme. `any_episodi` i `severitat` (fracció dels pins que mor): mode
+    «episodi»."""
 
     mode: str = "cap"
     taxa_anual: dict[str, float] = field(default_factory=dict)
+    risc_mida: dict[str, dict[str, float]] = field(default_factory=dict)
     tipus: str = ""
     any_episodi: int = 0
     severitat: float = 0.0
@@ -135,12 +143,19 @@ class Pertorbacio:
         if not 0.0 <= self.severitat <= 1.0:
             raise ValueError("La severitat ha d'estar entre 0 i 1.")
 
-    def supervivencia(self, any_: int, sp: np.ndarray, es_pi: np.ndarray) -> np.ndarray:
-        """Fracció de cada registre que sobreviu a les pertorbacions l'any `any_`."""
+    def supervivencia(self, any_: int, arbres: pd.DataFrame, es_pi: np.ndarray) -> np.ndarray:
+        """Fracció de cada registre que sobreviu a les pertorbacions l'any `any_`. `arbres`: estat a l'inici de
+        l'any, amb la competència (_competencia)."""
+        sp = arbres["sp"].to_numpy()
         factor = np.ones(len(sp))
         if self.mode == "risc_mitja":
             for codi, taxa in self.taxa_anual.items():
-                factor[(sp == codi) & es_pi] = 1.0 - taxa
+                idx = (sp == codi) & es_pi
+                coeficients = self.risc_mida.get(codi)
+                if coeficients and idx.any():
+                    factor[idx] = np.exp(-np.exp(_predictor_lineal(coeficients, variables_arbre(arbres.loc[idx]))))
+                else:
+                    factor[idx] = 1.0 - taxa
         elif self.mode == "episodi" and any_ == self.any_episodi:
             factor[es_pi] = 1.0 - self.severitat
         return factor
@@ -150,9 +165,10 @@ SENSE_PERTORBACIONS = Pertorbacio()
 
 
 def carregar_pertorbacions(ruta: Path) -> dict[str, dict]:
-    """Paràmetres de pertorbacions per espècie (codi): taxa anual total de pèrdua d'AB i, per tipus, probabilitat
-    anual d'episodi i severitat per defecte (fracció mitjana d'AB morta a les parcel·les afectades; si l'espècie
-    en té menys de MIN_PARCELES_SEVERITAT, la de totes dues espècies juntes)."""
+    """Paràmetres de pertorbacions per espècie (codi): taxa anual total de pèrdua d'AB, coeficients del risc
+    segons la mida (None si l'espècie fa servir la taxa uniforme) i, per tipus, probabilitat anual d'episodi i
+    severitat per defecte (fracció mitjana d'AB morta a les parcel·les afectades; si l'espècie en té menys de
+    MIN_PARCELES_SEVERITAT, la de totes dues espècies juntes)."""
     dades = json.loads(Path(ruta).read_text(encoding="utf-8"))
     conjunt = dades["pertorbacions"]["totes_especies"]["causes"]
     codi_per_nom = {nom: codi for codi, nom in ESPECIES.items()}
@@ -165,12 +181,15 @@ def carregar_pertorbacions(ruta: Path) -> dict[str, dict]:
             font = c if propi else conjunt[t]
             tipus[t] = {"p_anual": c["p_anual"], "severitat": font["fraccio_mitjana"] or 0.0,
                         "parceles_afectades": font["parceles_afectades"], "severitat_conjunta": not propi}
-        resultat[codi_per_nom[nom]] = {"taxa_anual": pert["taxa_perdua_ab_total"], "tipus": tipus}
+        mida = pert.get("mida") or {}
+        resultat[codi_per_nom[nom]] = {"taxa_anual": pert["taxa_perdua_ab_total"], "tipus": tipus,
+                                       "risc_mida": mida.get("coeficients") if mida.get("adoptat") else None}
     return resultat
 
 
 def pertorbacio_risc_mitja(parametres: dict[str, dict]) -> Pertorbacio:
-    return Pertorbacio("risc_mitja", taxa_anual={sp: p["taxa_anual"] for sp, p in parametres.items()})
+    return Pertorbacio("risc_mitja", taxa_anual={sp: p["taxa_anual"] for sp, p in parametres.items()},
+                       risc_mida={sp: p["risc_mida"] for sp, p in parametres.items() if p.get("risc_mida")})
 
 
 def pertorbacio_episodi(tipus: str, any_episodi: int, severitat: float) -> Pertorbacio:
@@ -288,7 +307,6 @@ def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int,
     # Un rodal que ja parteix per sobre del màxim no s'aclareix de cop: el seu límit és la densitat inicial.
     sdi_max = max(models[sp_dominant].sdi_max, _sdi_rodal(arbres["dbh"].to_numpy(), arbres["f"].to_numpy()))
 
-    sp_arbres = arbres["sp"].to_numpy()
     files = [_resum_any(0, arbres, rodal.habitat, factor, 0.0, 0.0) | {"increment_brut": 0.0,
                                                                        "morts_pertorbacio": 0.0}]
     inicials = estoc(arbres, rodal.habitat, factor)
@@ -306,7 +324,7 @@ def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int,
         increment_brut = float((crescuts["cat"] + crescuts["cst"]).sum() - (abans["cat"] + abans["cst"]).sum())
         f = arbres["f"].to_numpy()
         supervivents_fons = f * (1.0 - p_mort)
-        morts_pert = supervivents_fons * (1.0 - pertorbacio.supervivencia(any_, sp_arbres, es_pi))
+        morts_pert = supervivents_fons * (1.0 - pertorbacio.supervivencia(any_, comp, es_pi))
         morts = f - supervivents_fons + morts_pert
         arbres["f"] = f - morts
         arbres["dbh"] = arbres["dbh"] + increment
