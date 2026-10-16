@@ -7,7 +7,17 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from carboni.creixement import carregar_models, simular
+from carboni.creixement import (
+    EPISODIS,
+    MODES_PERTORBACIO,
+    SENSE_PERTORBACIONS,
+    TIPUS_PERTORBACIO,
+    carregar_models,
+    carregar_pertorbacions,
+    pertorbacio_episodi,
+    pertorbacio_risc_mitja,
+    simular,
+)
 from carboni.equacions import ESPECIES, HABITATS, NOMS_COMUNS
 from carboni.intervencio import TIPUS, aclarir, area_basimetrica
 from carboni.inventari import (
@@ -121,12 +131,13 @@ def carregar():
     resum = resum_parceles(parceles, arbres)
     models = carregar_models(DATA / "calibracio.json")
     calibracio = json.loads((DATA / "calibracio.json").read_text(encoding="utf-8"))
-    return resum, arbres, models, calibracio, parceles.set_index("parcela")["url_img"]
+    pertorbacions = carregar_pertorbacions(DATA / "calibracio.json")
+    return resum, arbres, models, calibracio, parceles.set_index("parcela")["url_img"], pertorbacions
 
 
 @st.cache_data
 def estoc_actual_pinars() -> pd.DataFrame:
-    resum, arbres, models, _, _ = carregar()
+    resum, arbres, models, _, _, _ = carregar()
     seleccio = pinars(resum).copy()
     seleccio["co2"] = [
         simular(rodal_de_parcela(resum, arbres, c), models, 0).serie["co2"].iloc[0] for c in seleccio["parcela"]
@@ -135,12 +146,24 @@ def estoc_actual_pinars() -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner="Actualitzant resultats…", max_entries=500)
-def simular_cache(arbres: pd.DataFrame, habitat: str, altitud: float, descripcio: str, anys: int):
-    _, _, models, _, _ = carregar()
-    return simular(Rodal(arbres, habitat, altitud, descripcio), models, anys)
+def simular_cache(arbres: pd.DataFrame, habitat: str, altitud: float, descripcio: str, anys: int,
+                  mode_pert: str, tipus_pert: str, any_pert: int, severitat_pert: float):
+    _, _, models, _, _, parametres = carregar()
+    if mode_pert == "risc_mitja":
+        pertorbacio = pertorbacio_risc_mitja(parametres)
+    elif mode_pert == "episodi":
+        pertorbacio = pertorbacio_episodi(tipus_pert, any_pert, severitat_pert)
+    else:
+        pertorbacio = SENSE_PERTORBACIONS
+    return simular(Rodal(arbres, habitat, altitud, descripcio), models, anys, pertorbacio)
 
 
-resum, arbres_inf, models, calibracio, fotos = carregar()
+resum, arbres_inf, models, calibracio, fotos, parametres_pert = carregar()
+
+
+def especie_dominant(arbres: pd.DataFrame) -> str:
+    pins = arbres[arbres["sp"].isin(ESPECIES)]
+    return pins.assign(g=pins["dbh"] ** 2 * pins["f"]).groupby("sp")["g"].sum().idxmax()
 
 
 def fmt(valor: float, decimals: int = 0) -> str:
@@ -249,6 +272,39 @@ with st.sidebar:
     st.subheader("Horitzó")
     anys = st.slider("Anys de projecció", 5, 80, 20, step=1, format="%d anys")
 
+    st.divider()
+    st.subheader("Pertorbacions")
+    mode_pert = st.radio(
+        "Escenari de pertorbacions", list(MODES_PERTORBACIO), index=1, format_func=MODES_PERTORBACIO.get,
+        help="Foc, sequera, neu i vent, plagues… La mortalitat de fons (competència i causa desconeguda) "
+             "s'aplica sempre.",
+    )
+    tipus_pert, any_pert, severitat_pert = "", 0, 0.0
+    taxes = "; ".join(f"{NOMS_COMUNS[sp].lower()} {fmt(p['taxa_anual'] * 100, 2)} %"
+                      for sp, p in parametres_pert.items())
+    if mode_pert == "cap":
+        st.caption("Només la mortalitat de fons (competència i causa desconeguda). Projecció optimista: "
+                   "no hi ha cap foc, sequera, nevada, ventada ni plaga.")
+    elif mode_pert == "risc_mitja":
+        st.caption(f"A més de la mortalitat de fons, cada any mor la fracció de pins que es va perdre de mitjana per "
+                   f"pertorbacions al Pirineu de Lleida entre 1989 i 2016 ({taxes} de l'AB), repartida entre "
+                   "totes les mides. És una mitjana: un rodal concret pot no patir-ne cap o patir-ne una de forta.")
+    else:
+        tipus_pert = st.selectbox("Tipus d'episodi", list(EPISODIS), format_func=TIPUS_PERTORBACIO.get)
+        any_pert = st.slider("Any de l'episodi", 1, anys, min(10, anys), step=1)
+        sp_pert = especie_dominant(rodal.arbres) if rodal is not None else "Pu"
+        dades_tipus = parametres_pert[sp_pert]["tipus"][tipus_pert]
+        severitat_pert = st.slider(
+            "Pins morts en l'episodi (% de l'AB)", 1, 100, max(1, round(dades_tipus["severitat"] * 100)), step=1,
+            key=f"severitat_{tipus_pert}_{sp_pert}",
+            help="Per defecte, la mitjana a les parcel·les de Lleida on aquesta causa va matar almenys el 10 % "
+                 "de l'AB de pins.") / 100.0
+        origen_sev = ("totes dues espècies" if dades_tipus["severitat_conjunta"]
+                      else NOMS_COMUNS[sp_pert].lower())
+        st.caption(f"L'any {any_pert} moren el {fmt(severitat_pert * 100)} % dels pins, de totes les mides. Valor per "
+                   f"defecte: mitjana de {dades_tipus['parceles_afectades']} parcel·les de Lleida afectades "
+                   f"({origen_sev}). La resta d'anys, només la mortalitat de fons.")
+
 if rodal is None:
     if error:
         st.error(error)
@@ -257,21 +313,28 @@ if rodal is None:
     st.stop()
 
 # ---------- Simulació ----------
-sim = simular_cache(rodal.arbres, rodal.habitat, rodal.altitud, rodal.descripcio, anys)
+parametres_simulacio = (mode_pert, tipus_pert, any_pert, severitat_pert)
+sim = simular_cache(rodal.arbres, rodal.habitat, rodal.altitud, rodal.descripcio, anys, *parametres_simulacio)
 serie = sim.serie
 sim_amb, extrets = None, None
 if amb_intervencio:
     rodal_aclarit, extrets = aclarir(rodal, tipus, pes / 100.0)
     sim_amb = simular_cache(rodal_aclarit.arbres, rodal_aclarit.habitat, rodal_aclarit.altitud,
-                            rodal_aclarit.descripcio, anys)
+                            rodal_aclarit.descripcio, anys, *parametres_simulacio)
 
 pins = rodal.arbres[rodal.arbres["sp"].isin(ESPECIES)]
-sp_dom = pins.assign(g=pins["dbh"] ** 2 * pins["f"]).groupby("sp")["g"].sum().idxmax()
+sp_dom = especie_dominant(rodal.arbres)
+if mode_pert == "episodi":
+    nom_pert = (f"episodi de {TIPUS_PERTORBACIO[tipus_pert].lower()} l'any {any_pert} "
+                f"({fmt(severitat_pert * 100)} % de l'AB)")
+else:
+    nom_pert = MODES_PERTORBACIO[mode_pert].lower()
 nom_aclarida = f"aclarida {NOMS_TIPUS_CURTS[tipus]} del {pes} % de l'AB"
 escenaris = f"{marca(VERD)}{SENSE}" + (f" &nbsp;·&nbsp; {marca(BLAU)}{AMB.lower()}: {nom_aclarida}" if sim_amb else "")
 st.markdown(
     f'<div class="context"><strong>{NOMS_COMUNS[sp_dom]}</strong> · {html.escape(rodal.descripcio, quote=False)} · '
-    f"hàbitat {HABITATS[rodal.habitat]} · horitzó <strong>{anys} anys</strong><br>{escenaris}</div>",
+    f"hàbitat {HABITATS[rodal.habitat]} · horitzó <strong>{anys} anys</strong> · pertorbacions: {nom_pert}"
+    f"<br>{escenaris}</div>",
     unsafe_allow_html=True,
 )
 
@@ -343,7 +406,8 @@ else:
     ), unsafe_allow_html=True)
     fila2[1].markdown(targeta(
         f"Àrea basimètrica d'aquí a {anys} anys", fmt(serie["ab"].iloc[-1], 1), "m²/ha",
-        f"{marca(VERD)}{fmt(serie['densitat'].iloc[-1])} peus/ha · mortalitat i autoaclarida incloses", VERD,
+        f"{marca(VERD)}{fmt(serie['densitat'].iloc[-1])} peus/ha · mortalitat"
+        f"{'' if mode_pert == 'cap' else ', pertorbacions'} i autoaclarida incloses", VERD,
     ), unsafe_allow_html=True)
 
 if codi_seleccionat is not None and isinstance(fotos.get(codi_seleccionat), str):
@@ -393,7 +457,8 @@ with tabs[0]:
     fig.update_layout(hovermode="x unified")
     escenaris_text = SENSE + (f" i {AMB.lower()} ({nom_aclarida})" if sim_amb else "")
     with st.container(border=True):
-        st.plotly_chart(estil(fig, f"Evolució estimada · {nom}", f"{escenaris_text} · horitzó {anys} anys",
+        st.plotly_chart(estil(fig, f"Evolució estimada · {nom}",
+                              f"{escenaris_text} · pertorbacions: {nom_pert} · horitzó {anys} anys",
                               unitats), width="stretch", config=CONFIG_GRAFIC)
 
 with tabs[1]:
@@ -445,6 +510,7 @@ with tabs[3]:
         "any": "Any", "densitat": "Densitat (peus/ha)", "ab": "AB (m²/ha)", "dq": "Dq (cm)", "ho": "Ho (m)",
         "bat": "Biomassa aèria (t/ha)", "bst": "Biomassa arrels (t/ha)", "cat": "C aeri (t/ha)",
         "cst": "C arrels (t/ha)", "co2": "CO₂ (t/ha)", "increment_brut": "Creixement (t C/ha·any)",
+        "morts_peus": "Morts (peus/ha·any)", "morts_pertorbacio": "Morts per pertorbacions (peus/ha·any)",
     }
     taula = serie[list(columnes)].assign(escenari=SENSE)
     if sim_amb is not None:
@@ -452,6 +518,7 @@ with tabs[3]:
     taula = taula[["escenari"] + list(columnes)].rename(columns={"escenari": "Escenari"} | columnes)
     formats = {c: "{:,.2f}" for c in taula.columns if c not in ("Escenari", "Any", "Densitat (peus/ha)")}
     formats["Densitat (peus/ha)"] = "{:,.0f}"
+    formats["Morts (peus/ha·any)"] = formats["Morts per pertorbacions (peus/ha·any)"] = "{:,.1f}"
     estil_taula = taula.style.format(formats, decimal=",", thousands=" ").hide(axis="index")
     with st.container(border=True):
         st.dataframe(estil_taula, hide_index=True, width="stretch", height=420)
@@ -462,7 +529,9 @@ with tabs[3]:
             "- **Dq**: diàmetre quadràtic mitjà, el de l'arbre d'àrea basimètrica mitjana.\n"
             "- **Ho**: alçada dominant, mitjana del 20 % de pins més gruixuts.\n"
             "- **C**: carboni, el 50 % de la biomassa. **CO₂** = C × 44/12 (aeri i arrels).\n"
-            "- **Creixement**: carboni que fixa el creixement dels arbres en un any, abans de la mortalitat."
+            "- **Creixement**: carboni que fixa el creixement dels arbres en un any, abans de la mortalitat.\n"
+            "- **Morts**: peus morts en l'any per mortalitat de fons, pertorbacions i autoaclarida.\n"
+            "- **Pertorbacions**: foc, sequera, neu i vent, plagues i altres causes externes de mort."
         )
     c2.download_button("Descarregar CSV", taula.to_csv(index=False).encode("utf-8"), "projeccio_carboni.csv",
                        "text/csv", type="secondary", width="stretch")
@@ -474,8 +543,10 @@ with tabs[4]:
         f"{pins_calibratge:,} registres de pins".replace(",", " ") + "</strong> remesurats a les comarques "
         "pirinenques de Lleida (Pallars Sobirà, Alt Urgell, Alta Ribagorça i Cerdanya) entre l'IFN2 (1989–90) i "
         "l'IFN3 (2000–01) i entre l'IFN3 i l'IFN4 (2014–16), amb un terme de període; les prediccions fan servir "
-        "el període més recent. S'han validat amb <strong>validació creuada per parcel·les</strong>: cada "
-        "parcel·la es prediu amb models ajustats sense ella."
+        "el període més recent. La mortalitat del model és la <strong>de fons</strong> (competència i causa "
+        "desconeguda): els pins morts per foc, sequera, neu, vent, plagues o altres pertorbacions, segons l'agent "
+        "causant que anota l'IFN, es tracten a part com a escenaris. S'han validat amb <strong>validació creuada "
+        "per parcel·les</strong>: cada parcel·la es prediu amb models ajustats sense ella."
         "</div>",
         unsafe_allow_html=True,
     )
@@ -489,14 +560,38 @@ with tabs[4]:
             "R² de l'AB final": v["parceles"]["r2"],
             "Biaix de l'AB (m²/ha)": v["parceles"]["biaix"],
             "R² de l'increment d'AB": v["increment_ab_parceles"]["r2"],
-            "Morts predits": v["mortalitat"]["morts_predits"],
-            "Morts observats": v["mortalitat"]["morts_observats"],
+            "R² sense pertorbacions": v["sense_pertorbacions"]["increment_ab_parceles"]["r2"],
+            "AUC mortalitat de fons": v["mortalitat"]["auc"],
+            "Morts de fons predits": v["mortalitat"]["morts_predits"],
+            "Morts de fons observats": v["mortalitat"]["morts_observats"],
         })
     resum_validacio = pd.DataFrame(files).style.format(
         {"Arbres": "{:,.0f}", "Parcel·les": "{:,.0f}", "R² de l'AB final": "{:.2f}",
-         "Biaix de l'AB (m²/ha)": "{:.2f}", "R² de l'increment d'AB": "{:.2f}", "Morts predits": "{:,.0f}",
-         "Morts observats": "{:,.0f}"}, decimal=",", thousands=" ").hide(axis="index")
+         "Biaix de l'AB (m²/ha)": "{:.2f}", "R² de l'increment d'AB": "{:.2f}", "R² sense pertorbacions": "{:.2f}",
+         "AUC mortalitat de fons": "{:.2f}", "Morts de fons predits": "{:,.0f}",
+         "Morts de fons observats": "{:,.0f}"}, decimal=",", thousands=" ").hide(axis="index")
     st.dataframe(resum_validacio, hide_index=True, width="stretch")
+    st.caption("AB i increment d'AB: parcel·les de pineda, amb la mortalitat de fons i la pèrdua mitjana per "
+               "pertorbacions (escenari de risc mitjà). «Sense pertorbacions»: només les parcel·les que hi van "
+               "perdre menys de 2 m²/ha, amb la mortalitat de fons.")
+
+    files = []
+    for especie, p in calibracio["especies"].items():
+        for tipus, c in p["pertorbacions"]["causes"].items():
+            files.append({
+                "Espècie": especie, "Pertorbació": TIPUS_PERTORBACIO[tipus],
+                "Pèrdua anual d'AB (%)": c["taxa_perdua_ab"] * 100,
+                "Parcel·les afectades": c["parceles_afectades"],
+                "Probabilitat anual d'episodi (%)": c["p_anual"] * 100,
+                "AB morta en l'episodi (%, mitjana)": (c["fraccio_mitjana"] or np.nan) * 100,
+            })
+    st.markdown("**Pertorbacions al Pirineu de Lleida (IFN2–IFN4)**")
+    st.dataframe(pd.DataFrame(files).style.format(
+        {"Pèrdua anual d'AB (%)": "{:.3f}", "Probabilitat anual d'episodi (%)": "{:.3f}",
+         "AB morta en l'episodi (%, mitjana)": "{:.0f}"}, decimal=",", thousands=" ", na_rep="–"
+    ).hide(axis="index"), hide_index=True, width="stretch")
+    st.caption("Parcel·la afectada: la causa hi va matar almenys el 10 % de l'AB inicial de pins de l'espècie. "
+               "Totes les parcel·les remesurades amb l'espècie, tots dos períodes junts.")
 
     validacio = pd.read_csv(DATA / "validacio_parceles.csv")
     fig = go.Figure()

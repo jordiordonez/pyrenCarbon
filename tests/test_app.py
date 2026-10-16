@@ -69,3 +69,23 @@ def test_sliders_amb_pas_d_un():
     assert not at.exception
     assert "horitzó <strong>80 anys</strong>" in text_markdown(at)
     assert "del 17 % de l'AB" in text_markdown(at)
+
+
+def test_pertorbacions_tres_modes():
+    at = iniciar()
+    radio = next(r for r in at.radio if r.label == "Escenari de pertorbacions")
+    assert radio.value == "risc_mitja"
+    assert "pertorbacions: risc mitjà" in text_markdown(at)
+    radio.set_value("cap").run()
+    assert not at.exception
+    assert "pertorbacions: sense pertorbacions" in text_markdown(at)
+    next(r for r in at.radio if r.label == "Escenari de pertorbacions").set_value("episodi").run()
+    assert not at.exception
+    tipus = next(s for s in at.selectbox if s.label == "Tipus d'episodi")
+    tipus.set_value("sequera").run()
+    assert not at.exception
+    assert "episodi de sequera l'any 10" in text_markdown(at)
+    any_ep = next(s for s in at.slider if s.label == "Any de l'episodi")
+    any_ep.set_value(3).run()
+    assert not at.exception
+    assert "l'any 3" in text_markdown(at)

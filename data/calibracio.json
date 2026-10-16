@@ -15,6 +15,84 @@
     "terme_periode": "p34",
     "periode_referencia": "IFN3-IFN4"
   },
+  "pertorbacions": {
+    "descripcio": "Mortalitat per pertorbacions (agent causant de l'IFN), estimada a part de la de fons. Fracció de l'AB inicial de pins de l'espècie; tots dos períodes junts; totes les parcel·les remesurades on hi ha l'espècie.",
+    "tipus": [
+      "foc",
+      "sequera",
+      "neu_vent",
+      "biotic",
+      "altres"
+    ],
+    "llindar_afectada": 0.1,
+    "totes_especies": {
+      "parceles": 1195,
+      "anys_parcela": 14735.0,
+      "causes": {
+        "foc": {
+          "taxa_perdua_ab": 0.0001928428100675632,
+          "parceles_afectades": 4,
+          "parceles_amb_morts": 7,
+          "taxa_episodis": 0.00027146250424160164,
+          "p_anual": 0.0002714256616298538,
+          "fraccio_mitjana": 0.4651636691582808,
+          "fraccio_mediana": 0.3517714339106668
+        },
+        "sequera": {
+          "taxa_perdua_ab": 0.00013892164958926041,
+          "parceles_afectades": 6,
+          "parceles_amb_morts": 9,
+          "taxa_episodis": 0.0004071937563624024,
+          "p_anual": 0.00040711086423617093,
+          "fraccio_mitjana": 0.6076186240622033,
+          "fraccio_mediana": 0.6525789534824685
+        },
+        "neu_vent": {
+          "taxa_perdua_ab": 0.0012213053068862755,
+          "parceles_afectades": 43,
+          "parceles_amb_morts": 131,
+          "taxa_episodis": 0.0029182219205972173,
+          "p_anual": 0.0029139680499272735,
+          "fraccio_mitjana": 0.20439722239828004,
+          "fraccio_mediana": 0.17379974982510554
+        },
+        "biotic": {
+          "taxa_perdua_ab": 0.001776170784732064,
+          "parceles_afectades": 69,
+          "parceles_amb_morts": 168,
+          "taxa_episodis": 0.004682728198167628,
+          "p_anual": 0.0046717813202290515,
+          "fraccio_mitjana": 0.24470971757621324,
+          "fraccio_mediana": 0.17718360166996833
+        },
+        "altres": {
+          "taxa_perdua_ab": 0.0004318298074953877,
+          "parceles_afectades": 24,
+          "parceles_amb_morts": 57,
+          "taxa_episodis": 0.0016287750254496097,
+          "p_anual": 0.001627449291279781,
+          "fraccio_mitjana": 0.3651124758951036,
+          "fraccio_mediana": 0.2893295657509879
+        }
+      },
+      "taxa_perdua_ab_total": 0.0037610703587705506,
+      "taxa_perdua_ab_fons_observada": 0.002301754001153099,
+      "per_periode": {
+        "IFN2-IFN3": {
+          "parceles": 768,
+          "anys_parcela": 8991.0,
+          "taxa_perdua_ab_total": 0.003797613437829698,
+          "taxa_perdua_ab_fons_observada": 0.0020385863606007322
+        },
+        "IFN3-IFN4": {
+          "parceles": 427,
+          "anys_parcela": 5744.0,
+          "taxa_perdua_ab_total": 0.0037153991534498373,
+          "taxa_perdua_ab_fons_observada": 0.0026306585065994288
+        }
+      }
+    }
+  },
   "especies": {
     "Pinus sylvestris": {
       "creixement": {
@@ -27,15 +105,82 @@
       },
       "correccio_biaix": 1.0901185514390561,
       "mortalitat": {
-        "Intercept": -6.541967255144522,
-        "inv_d": 11.68381080391508,
-        "dbh": 0.018129753494002282,
-        "bal": 0.028924180069194904
+        "Intercept": -8.119275142086442,
+        "inv_d": 18.24832332002184,
+        "dbh": 0.022961411163208895,
+        "bal": 0.04166269474070184
       },
       "sdi_max": 1186.6604340033948,
       "sdi_p50_andorra": 854.2032134727576,
       "sdi_p50_lleida": 419.83642668457946,
       "n_parceles": 810,
+      "pertorbacions": {
+        "parceles": 740,
+        "anys_parcela": 9095.0,
+        "causes": {
+          "foc": {
+            "taxa_perdua_ab": 0.00029669191639647804,
+            "parceles_afectades": 3,
+            "parceles_amb_morts": 5,
+            "taxa_episodis": 0.0003298515667949423,
+            "p_anual": 0.0003297971717478587,
+            "fraccio_mitjana": 0.5678476226071112,
+            "fraccio_mediana": 0.5260513135969151
+          },
+          "sequera": {
+            "taxa_perdua_ab": 0.00023268144564441922,
+            "parceles_afectades": 5,
+            "parceles_amb_morts": 8,
+            "taxa_episodis": 0.0005497526113249038,
+            "p_anual": 0.0005496015250460173,
+            "fraccio_mitjana": 0.6778321612274357,
+            "fraccio_mediana": 0.743640934387011
+          },
+          "neu_vent": {
+            "taxa_perdua_ab": 0.0009595679339899083,
+            "parceles_afectades": 20,
+            "parceles_amb_morts": 69,
+            "taxa_episodis": 0.0021990104452996153,
+            "p_anual": 0.0021965943931294696,
+            "fraccio_mitjana": 0.1809842524919219,
+            "fraccio_mediana": 0.1611023709097839
+          },
+          "biotic": {
+            "taxa_perdua_ab": 0.001638236032881938,
+            "parceles_afectades": 36,
+            "parceles_amb_morts": 88,
+            "taxa_episodis": 0.0039582188015393075,
+            "p_anual": 0.003950395379175298,
+            "fraccio_mitjana": 0.2683912583788226,
+            "fraccio_mediana": 0.1844120765711526
+          },
+          "altres": {
+            "taxa_perdua_ab": 0.00029389697474287564,
+            "parceles_afectades": 11,
+            "parceles_amb_morts": 28,
+            "taxa_episodis": 0.0012094557449147884,
+            "p_anual": 0.0012087246480880776,
+            "fraccio_mitjana": 0.3856741391030937,
+            "fraccio_mediana": 0.26984940455415096
+          }
+        },
+        "taxa_perdua_ab_total": 0.0034210743036556194,
+        "taxa_perdua_ab_fons_observada": 0.0020884339298927446,
+        "per_periode": {
+          "IFN2-IFN3": {
+            "parceles": 482,
+            "anys_parcela": 5622.0,
+            "taxa_perdua_ab_total": 0.003244757875815072,
+            "taxa_perdua_ab_fons_observada": 0.0017893504310658808
+          },
+          "IFN3-IFN4": {
+            "parceles": 258,
+            "anys_parcela": 3473.0,
+            "taxa_perdua_ab_total": 0.0036475867784053584,
+            "taxa_perdua_ab_fons_observada": 0.002472664397273527
+          }
+        }
+      },
       "periode": {
         "terme": "p34",
         "codificacio": "p34 = 1 a IFN3-IFN4, 0 a IFN2-IFN3",
@@ -47,10 +192,10 @@
           "efecte_relatiu": -0.02743961029471098
         },
         "mortalitat": {
-          "coef": 0.09851939613612051,
-          "ee": 0.07176178703727358,
-          "p": 0.16979366751533098,
-          "rao_de_riscos": 1.103535808517568
+          "coef": 0.25674102586261294,
+          "ee": 0.1164385422511081,
+          "p": 0.027457686432876497,
+          "rao_de_riscos": 1.2927103048700248
         }
       },
       "ajust": {
@@ -88,25 +233,25 @@
         },
         "mortalitat": {
           "coeficients": {
-            "Intercept": -6.640486651280643,
-            "inv_d": 11.68381080391508,
-            "dbh": 0.018129753494002282,
-            "bal": 0.028924180069194904,
-            "p34": 0.09851939613612051
+            "Intercept": -8.376016167949055,
+            "inv_d": 18.24832332002184,
+            "dbh": 0.022961411163208895,
+            "bal": 0.04166269474070184,
+            "p34": 0.25674102586261294
           },
           "ee": {
-            "Intercept": 0.2947986803325654,
-            "inv_d": 2.713393415970311,
-            "dbh": 0.006645210446906905,
-            "bal": 0.0032420987099930952,
-            "p34": 0.07176178703727358
+            "Intercept": 0.4804315030728241,
+            "inv_d": 4.057378807887171,
+            "dbh": 0.01142076364675195,
+            "bal": 0.004952744139263965,
+            "p34": 0.1164385422511081
           },
           "p": {
-            "Intercept": 2.335282810212402e-112,
-            "inv_d": 1.6625000914773473e-05,
-            "dbh": 0.0063672550029491804,
-            "bal": 4.602757118168566e-19,
-            "p34": 0.16979366751533098
+            "Intercept": 4.5259172196935444e-68,
+            "inv_d": 6.87362775311926e-06,
+            "dbh": 0.044378612361018845,
+            "bal": 4.0293144772644683e-17,
+            "p34": 0.027457686432876497
           },
           "convergit": true
         }
@@ -115,6 +260,8 @@
         "arbres": 11546,
         "parceles": 567,
         "morts": 823,
+        "morts_fons": 314,
+        "morts_pertorbacio": 509,
         "arbres_creixement": 10711,
         "anys_min": 11,
         "anys_max": 15,
@@ -133,17 +280,42 @@
             "arbres": 6980,
             "parceles": 482,
             "morts": 432,
+            "morts_fons": 149,
+            "morts_pertorbacio": 283,
             "arbres_creixement": 6540,
             "anys_min": 11,
-            "anys_max": 12
+            "anys_max": 12,
+            "morts_causa": {
+              "per_causa": {
+                "fons": 149,
+                "biotic": 140,
+                "neu_vent": 101,
+                "altres": 38,
+                "foc": 4
+              },
+              "sense_agent": 0
+            }
           },
           "IFN3-IFN4": {
             "arbres": 4566,
             "parceles": 258,
             "morts": 391,
+            "morts_fons": 165,
+            "morts_pertorbacio": 226,
             "arbres_creixement": 4171,
             "anys_min": 13,
-            "anys_max": 15
+            "anys_max": 15,
+            "morts_causa": {
+              "per_causa": {
+                "fons": 165,
+                "biotic": 109,
+                "neu_vent": 47,
+                "sequera": 35,
+                "foc": 29,
+                "altres": 6
+              },
+              "sense_agent": 0
+            }
           }
         }
       },
@@ -156,24 +328,122 @@
           "mitjana_observada": 0.2522143684063113
         },
         "mortalitat": {
-          "n": 11546,
-          "auc": 0.5954417826842269,
-          "morts_observats": 823,
-          "morts_predits": 823.486559488003
+          "tipus": "fons",
+          "n": 11037,
+          "censurats_pertorbacio": 509,
+          "auc": 0.6654984731314496,
+          "morts_observats": 314,
+          "morts_predits": 315.5347285928004,
+          "calibratge_decils": [
+            {
+              "n": 1104,
+              "p_mitjana": 0.010491844616034458,
+              "observats": 15,
+              "predits": 11.582996456102041
+            },
+            {
+              "n": 1104,
+              "p_mitjana": 0.012655148590055676,
+              "observats": 9,
+              "predits": 13.971284043421466
+            },
+            {
+              "n": 1103,
+              "p_mitjana": 0.014896810489336419,
+              "observats": 28,
+              "predits": 16.43118196973807
+            },
+            {
+              "n": 1104,
+              "p_mitjana": 0.01702741773614413,
+              "observats": 23,
+              "predits": 18.79826918070312
+            },
+            {
+              "n": 1104,
+              "p_mitjana": 0.019427028380413523,
+              "observats": 18,
+              "predits": 21.44743933197653
+            },
+            {
+              "n": 1103,
+              "p_mitjana": 0.022430900430422698,
+              "observats": 24,
+              "predits": 24.741283174756234
+            },
+            {
+              "n": 1104,
+              "p_mitjana": 0.026544552101857233,
+              "observats": 30,
+              "predits": 29.305185520450387
+            },
+            {
+              "n": 1103,
+              "p_mitjana": 0.03263109720442636,
+              "observats": 31,
+              "predits": 35.99210021648228
+            },
+            {
+              "n": 1104,
+              "p_mitjana": 0.04317668425574524,
+              "observats": 48,
+              "predits": 47.667059418342745
+            },
+            {
+              "n": 1104,
+              "p_mitjana": 0.08659232724712633,
+              "observats": 88,
+              "predits": 95.59792928082747
+            }
+          ]
         },
         "parceles": {
           "n": 444,
-          "biaix": -0.10869391891891904,
-          "rmse": 3.9376376143233687,
-          "r2": 0.9145642682730688,
+          "biaix": -0.05996891891891891,
+          "rmse": 3.912719346969976,
+          "r2": 0.9156421603991024,
           "mitjana_observada": 23.25852882882883
         },
         "increment_ab_parceles": {
           "n": 444,
-          "biaix": -0.10869391891891904,
-          "rmse": 3.9376376143233687,
-          "r2": 0.16655075063530433,
+          "biaix": -0.05996891891891891,
+          "rmse": 3.912719346969976,
+          "r2": 0.17706588716167226,
           "mitjana_observada": 4.066711261261261
+        },
+        "nomes_fons": {
+          "parceles": {
+            "n": 444,
+            "biaix": 0.9478630630630629,
+            "rmse": 4.051240997477148,
+            "r2": 0.9095634031590283,
+            "mitjana_observada": 23.25852882882883
+          },
+          "increment_ab_parceles": {
+            "n": 444,
+            "biaix": 0.9478630630630629,
+            "rmse": 4.051240997477148,
+            "r2": 0.11776592499826455,
+            "mitjana_observada": 4.066711261261261
+          }
+        },
+        "sense_pertorbacions": {
+          "parceles": {
+            "n": 394,
+            "biaix": 0.2786824873096446,
+            "rmse": 2.6511885412286564,
+            "r2": 0.9600168666031175,
+            "mitjana_observada": 22.541691878172585
+          },
+          "increment_ab_parceles": {
+            "n": 394,
+            "biaix": 0.2786824873096446,
+            "rmse": 2.6511885412286564,
+            "r2": 0.3624173100416871,
+            "mitjana_observada": 4.595048223350254
+          },
+          "llindar_m2ha": 2.0,
+          "parceles_excloses": 50
         },
         "comparacio_informe": [
           {
@@ -215,24 +485,122 @@
               "mitjana_observada": 0.2707085932721713
             },
             "mortalitat": {
-              "n": 6980,
-              "auc": 0.595745237448811,
-              "morts_observats": 432,
-              "morts_predits": 432.9207350204265
+              "tipus": "fons",
+              "n": 6697,
+              "censurats_pertorbacio": 283,
+              "auc": 0.6705751640953947,
+              "morts_observats": 149,
+              "morts_predits": 149.57105306086606,
+              "calibratge_decils": [
+                {
+                  "n": 670,
+                  "p_mitjana": 0.009995340318113114,
+                  "observats": 8,
+                  "predits": 6.696878013135787
+                },
+                {
+                  "n": 670,
+                  "p_mitjana": 0.011468097832670623,
+                  "observats": 7,
+                  "predits": 7.683625547889317
+                },
+                {
+                  "n": 669,
+                  "p_mitjana": 0.012709116174012552,
+                  "observats": 3,
+                  "predits": 8.502398720414398
+                },
+                {
+                  "n": 670,
+                  "p_mitjana": 0.014250853764429694,
+                  "observats": 11,
+                  "predits": 9.548072022167895
+                },
+                {
+                  "n": 670,
+                  "p_mitjana": 0.01594989882555062,
+                  "observats": 12,
+                  "predits": 10.686432213118916
+                },
+                {
+                  "n": 669,
+                  "p_mitjana": 0.018084424348672055,
+                  "observats": 12,
+                  "predits": 12.098479889261604
+                },
+                {
+                  "n": 670,
+                  "p_mitjana": 0.02099701534238092,
+                  "observats": 16,
+                  "predits": 14.068000279395216
+                },
+                {
+                  "n": 669,
+                  "p_mitjana": 0.025299574694831944,
+                  "observats": 16,
+                  "predits": 16.92541547084257
+                },
+                {
+                  "n": 670,
+                  "p_mitjana": 0.03301349261837505,
+                  "observats": 23,
+                  "predits": 22.119040054311284
+                },
+                {
+                  "n": 670,
+                  "p_mitjana": 0.061556284851237444,
+                  "observats": 41,
+                  "predits": 41.24271085032909
+                }
+              ]
             },
             "parceles": {
               "n": 299,
-              "biaix": -0.10701571906354523,
-              "rmse": 2.925730959056661,
-              "r2": 0.9444320458031852,
+              "biaix": -0.0843384615384616,
+              "rmse": 2.925723543051854,
+              "r2": 0.9444323275048856,
               "mitjana_observada": 21.24072508361204
             },
             "increment_ab_parceles": {
               "n": 299,
-              "biaix": -0.10701571906354522,
-              "rmse": 2.925730959056661,
-              "r2": 0.2766745623248885,
+              "biaix": -0.0843384615384616,
+              "rmse": 2.925723543051854,
+              "r2": 0.27667822922263097,
               "mitjana_observada": 4.14299397993311
+            },
+            "nomes_fons": {
+              "parceles": {
+                "n": 299,
+                "biaix": 0.7797391304347825,
+                "rmse": 3.084502318512615,
+                "r2": 0.9382373622552377,
+                "mitjana_observada": 21.24072508361204
+              },
+              "increment_ab_parceles": {
+                "n": 299,
+                "biaix": 0.7797391304347825,
+                "rmse": 3.084502318512615,
+                "r2": 0.196038658891993,
+                "mitjana_observada": 4.14299397993311
+              }
+            },
+            "sense_pertorbacions": {
+              "parceles": {
+                "n": 268,
+                "biaix": 0.2882492537313433,
+                "rmse": 2.383080098098934,
+                "r2": 0.9621157410299144,
+                "mitjana_observada": 20.430190671641792
+              },
+              "increment_ab_parceles": {
+                "n": 268,
+                "biaix": 0.2882492537313433,
+                "rmse": 2.383080098098934,
+                "r2": 0.41642249017609856,
+                "mitjana_observada": 4.457964552238806
+              },
+              "llindar_m2ha": 2.0,
+              "parceles_excloses": 31
             },
             "comparacio_informe": [
               {
@@ -274,24 +642,122 @@
               "mitjana_observada": 0.22321599136897627
             },
             "mortalitat": {
-              "n": 4566,
-              "auc": 0.5699379757109821,
-              "morts_observats": 391,
-              "morts_predits": 390.56582446757636
+              "tipus": "fons",
+              "n": 4340,
+              "censurats_pertorbacio": 226,
+              "auc": 0.6261382689167121,
+              "morts_observats": 165,
+              "morts_predits": 165.96367553193426,
+              "calibratge_decils": [
+                {
+                  "n": 434,
+                  "p_mitjana": 0.015240135570214367,
+                  "observats": 18,
+                  "predits": 6.614218837473035
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.017889017310466725,
+                  "observats": 10,
+                  "predits": 7.7638335127425595
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.020137539154630693,
+                  "observats": 8,
+                  "predits": 8.739691993109721
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.02289896029983424,
+                  "observats": 8,
+                  "predits": 9.93814877012806
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.026116899004919963,
+                  "observats": 11,
+                  "predits": 11.334734168135263
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.03010030315700417,
+                  "observats": 15,
+                  "predits": 13.063531570139808
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.035583234582138315,
+                  "observats": 10,
+                  "predits": 15.443123808648028
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.04333206786567833,
+                  "observats": 15,
+                  "predits": 18.806117453704395
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.05754296805942994,
+                  "observats": 24,
+                  "predits": 24.973648137792594
+                },
+                {
+                  "n": 434,
+                  "p_mitjana": 0.11356365732732905,
+                  "observats": 46,
+                  "predits": 49.286627280060806
+                }
+              ]
             },
             "parceles": {
               "n": 145,
-              "biaix": -0.11215448275862068,
-              "rmse": 5.4613405958736845,
-              "r2": 0.8595426267131959,
+              "biaix": -0.009717241379310387,
+              "rmse": 5.406231306799654,
+              "r2": 0.8623629789353731,
               "mitjana_observada": 27.419379310344826
             },
             "increment_ab_parceles": {
               "n": 145,
-              "biaix": -0.11215448275862068,
-              "rmse": 5.4613405958736845,
-              "r2": 0.0829871096576914,
+              "biaix": -0.009717241379310387,
+              "rmse": 5.406231306799654,
+              "r2": 0.10140052066290084,
               "mitjana_observada": 3.909411034482758
+            },
+            "nomes_fons": {
+              "parceles": {
+                "n": 145,
+                "biaix": 1.2945462068965514,
+                "rmse": 5.535117726561608,
+                "r2": 0.855722123128605,
+                "mitjana_observada": 27.419379310344826
+              },
+              "increment_ab_parceles": {
+                "n": 145,
+                "biaix": 1.2945462068965514,
+                "rmse": 5.535117726561608,
+                "r2": 0.05804394752468578,
+                "mitjana_observada": 3.909411034482758
+              }
+            },
+            "sense_pertorbacions": {
+              "parceles": {
+                "n": 126,
+                "biaix": 0.25833412698412694,
+                "rmse": 3.146371690055726,
+                "r2": 0.9507981509433222,
+                "mitjana_observada": 27.03282142857143
+              },
+              "increment_ab_parceles": {
+                "n": 126,
+                "biaix": 0.25833412698412694,
+                "rmse": 3.146371690055726,
+                "r2": 0.2746776715918965,
+                "mitjana_observada": 4.886623015873015
+              },
+              "llindar_m2ha": 2.0,
+              "parceles_excloses": 19
             },
             "comparacio_informe": [
               {
@@ -338,15 +804,82 @@
       },
       "correccio_biaix": 1.118598073825272,
       "mortalitat": {
-        "Intercept": -6.636149071991425,
-        "inv_d": 5.97135958068611,
-        "dbh": 0.03247954801514659,
-        "bal": 0.02395856954263712
+        "Intercept": -8.431709518906198,
+        "inv_d": 12.4707468477682,
+        "dbh": 0.043231115659357895,
+        "bal": 0.04255870152373449
       },
       "sdi_max": 1318.7094482860116,
       "sdi_p50_andorra": 845.8387526301785,
       "sdi_p50_lleida": 452.57312128089114,
       "n_parceles": 553,
+      "pertorbacions": {
+        "parceles": 455,
+        "anys_parcela": 5640.0,
+        "causes": {
+          "foc": {
+            "taxa_perdua_ab": 4.9979788490284075e-05,
+            "parceles_afectades": 1,
+            "parceles_amb_morts": 2,
+            "taxa_episodis": 0.0001773049645390071,
+            "p_anual": 0.00017728924694271342,
+            "fraccio_mitjana": 0.1571118088117895,
+            "fraccio_mediana": 0.1571118088117895
+          },
+          "sequera": {
+            "taxa_perdua_ab": 9.938279000736607e-06,
+            "parceles_afectades": 1,
+            "parceles_amb_morts": 1,
+            "taxa_episodis": 0.0001773049645390071,
+            "p_anual": 0.00017728924694271342,
+            "fraccio_mitjana": 0.2565509382360416,
+            "fraccio_mediana": 0.2565509382360416
+          },
+          "neu_vent": {
+            "taxa_perdua_ab": 0.001581371881106402,
+            "parceles_afectades": 23,
+            "parceles_amb_morts": 62,
+            "taxa_episodis": 0.004078014184397163,
+            "p_anual": 0.004069710376070734,
+            "fraccio_mitjana": 0.2247563266646784,
+            "fraccio_mediana": 0.19184998486054786
+          },
+          "biotic": {
+            "taxa_perdua_ab": 0.0019659247087322213,
+            "parceles_afectades": 33,
+            "parceles_amb_morts": 80,
+            "taxa_episodis": 0.005851063829787234,
+            "p_anual": 0.005833979692183799,
+            "fraccio_mitjana": 0.21887530942791197,
+            "fraccio_mediana": 0.1624666064526983
+          },
+          "altres": {
+            "taxa_perdua_ab": 0.0006215810914335021,
+            "parceles_afectades": 13,
+            "parceles_amb_morts": 29,
+            "taxa_episodis": 0.002304964539007092,
+            "p_anual": 0.0023023101480613706,
+            "fraccio_mitjana": 0.3477141454883427,
+            "fraccio_mediana": 0.3088097269478249
+          }
+        },
+        "taxa_perdua_ab_total": 0.004228795748763147,
+        "taxa_perdua_ab_fons_observada": 0.0025952139164152612,
+        "per_periode": {
+          "IFN2-IFN3": {
+            "parceles": 286,
+            "anys_parcela": 3369.0,
+            "taxa_perdua_ab_total": 0.004580628173336451,
+            "taxa_perdua_ab_fons_observada": 0.002391581643369269
+          },
+          "IFN3-IFN4": {
+            "parceles": 169,
+            "anys_parcela": 2271.0,
+            "taxa_perdua_ab_total": 0.003805371274092856,
+            "taxa_perdua_ab_fons_observada": 0.002840281972166478
+          }
+        }
+      },
       "periode": {
         "terme": "p34",
         "codificacio": "p34 = 1 a IFN3-IFN4, 0 a IFN2-IFN3",
@@ -358,10 +891,10 @@
           "efecte_relatiu": -0.03901442115753295
         },
         "mortalitat": {
-          "coef": -0.17122360794782082,
-          "ee": 0.07992659680140164,
-          "p": 0.032172508672114554,
-          "rao_de_riscos": 0.8426331329383825
+          "coef": 0.005620387526959203,
+          "ee": 0.12749144128798562,
+          "p": 0.9648371037292766,
+          "rao_de_riscos": 1.0056362115367345
         }
       },
       "ajust": {
@@ -399,25 +932,25 @@
         },
         "mortalitat": {
           "coeficients": {
-            "Intercept": -6.4649254640436045,
-            "inv_d": 5.97135958068611,
-            "dbh": 0.03247954801514659,
-            "bal": 0.02395856954263712,
-            "p34": -0.17122360794782082
+            "Intercept": -8.437329906433156,
+            "inv_d": 12.4707468477682,
+            "dbh": 0.043231115659357895,
+            "bal": 0.04255870152373449,
+            "p34": 0.005620387526959203
           },
           "ee": {
-            "Intercept": 0.2642694567378266,
-            "inv_d": 2.9833624780133343,
-            "dbh": 0.004768358519934516,
-            "bal": 0.003548794762253993,
-            "p34": 0.07992659680140164
+            "Intercept": 0.38693655186686077,
+            "inv_d": 4.152348432769462,
+            "dbh": 0.0069622035672803236,
+            "bal": 0.005373975690214174,
+            "p34": 0.12749144128798562
           },
           "p": {
-            "Intercept": 3.625515670512039e-132,
-            "inv_d": 0.04533277540514499,
-            "dbh": 9.660404979119194e-12,
-            "bal": 1.4664259282261365e-11,
-            "p34": 0.032172508672114554
+            "Intercept": 2.0592157295210043e-105,
+            "inv_d": 0.00267069276538232,
+            "dbh": 5.318685304932438e-10,
+            "bal": 2.386456898046315e-15,
+            "p34": 0.9648371037292766
           },
           "convergit": true
         }
@@ -426,6 +959,8 @@
         "arbres": 8057,
         "parceles": 350,
         "morts": 661,
+        "morts_fons": 255,
+        "morts_pertorbacio": 406,
         "arbres_creixement": 7369,
         "anys_min": 11,
         "anys_max": 15,
@@ -444,17 +979,41 @@
             "arbres": 4709,
             "parceles": 286,
             "morts": 377,
+            "morts_fons": 130,
+            "morts_pertorbacio": 247,
             "arbres_creixement": 4319,
             "anys_min": 11,
-            "anys_max": 12
+            "anys_max": 12,
+            "morts_causa": {
+              "per_causa": {
+                "fons": 130,
+                "neu_vent": 118,
+                "biotic": 89,
+                "altres": 38,
+                "foc": 2
+              },
+              "sense_agent": 0
+            }
           },
           "IFN3-IFN4": {
             "arbres": 3348,
             "parceles": 169,
             "morts": 284,
+            "morts_fons": 125,
+            "morts_pertorbacio": 159,
             "arbres_creixement": 3050,
             "anys_min": 13,
-            "anys_max": 15
+            "anys_max": 15,
+            "morts_causa": {
+              "per_causa": {
+                "fons": 125,
+                "biotic": 96,
+                "neu_vent": 40,
+                "altres": 22,
+                "sequera": 1
+              },
+              "sense_agent": 0
+            }
           }
         }
       },
@@ -467,24 +1026,122 @@
           "mitjana_observada": 0.1997298276563984
         },
         "mortalitat": {
-          "n": 8057,
-          "auc": 0.5860451002259061,
-          "morts_observats": 661,
-          "morts_predits": 660.5506739419477
+          "tipus": "fons",
+          "n": 7651,
+          "censurats_pertorbacio": 406,
+          "auc": 0.619631703411489,
+          "morts_observats": 255,
+          "morts_predits": 254.45173091128785,
+          "calibratge_decils": [
+            {
+              "n": 766,
+              "p_mitjana": 0.013905154411214283,
+              "observats": 16,
+              "predits": 10.65134827899014
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.01770349150899747,
+              "observats": 18,
+              "predits": 13.543171004383066
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.020255520854945596,
+              "observats": 18,
+              "predits": 15.49547345403338
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.02272868255010485,
+              "observats": 13,
+              "predits": 17.38744215083021
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.025509809790923415,
+              "observats": 16,
+              "predits": 19.515004490056413
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.028854623662035714,
+              "observats": 28,
+              "predits": 22.07378710145732
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.03302804921431599,
+              "observats": 16,
+              "predits": 25.266457648951732
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.039030414827768534,
+              "observats": 35,
+              "predits": 29.85826734324293
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.04912974202344798,
+              "observats": 49,
+              "predits": 37.5842526479377
+            },
+            {
+              "n": 765,
+              "p_mitjana": 0.08245297619791497,
+              "observats": 46,
+              "predits": 63.07652679140496
+            }
+          ]
         },
         "parceles": {
           "n": 307,
-          "biaix": -0.16264234527687293,
-          "rmse": 3.5259139540920788,
-          "r2": 0.9356169362960413,
+          "biaix": -0.15150195439739403,
+          "rmse": 3.5692061119904115,
+          "r2": 0.9340262036185246,
           "mitjana_observada": 23.747898697068404
         },
         "increment_ab_parceles": {
           "n": 307,
-          "biaix": -0.16264234527687293,
-          "rmse": 3.5259139540920788,
-          "r2": 0.336224993866467,
+          "biaix": -0.15150195439739403,
+          "rmse": 3.5692061119904115,
+          "r2": 0.31982489526863445,
           "mitjana_observada": 2.77338664495114
+        },
+        "nomes_fons": {
+          "parceles": {
+            "n": 307,
+            "biaix": 1.130798697068404,
+            "rmse": 3.785261747858999,
+            "r2": 0.9257972413011426,
+            "mitjana_observada": 23.747898697068404
+          },
+          "increment_ab_parceles": {
+            "n": 307,
+            "biaix": 1.130798697068404,
+            "rmse": 3.785261747858999,
+            "r2": 0.234986131804246,
+            "mitjana_observada": 2.77338664495114
+          }
+        },
+        "sense_pertorbacions": {
+          "parceles": {
+            "n": 247,
+            "biaix": 0.4232566801619433,
+            "rmse": 3.2802659409320563,
+            "r2": 0.938525785201493,
+            "mitjana_observada": 22.244182591093114
+          },
+          "increment_ab_parceles": {
+            "n": 247,
+            "biaix": 0.4232566801619433,
+            "rmse": 3.2802659409320563,
+            "r2": 0.36638802496237166,
+            "mitjana_observada": 3.451653846153846
+          },
+          "llindar_m2ha": 2.0,
+          "parceles_excloses": 60
         },
         "comparacio_informe": [
           {
@@ -526,24 +1183,122 @@
               "mitjana_observada": 0.21032820097244734
             },
             "mortalitat": {
-              "n": 4709,
-              "auc": 0.570575582121575,
-              "morts_observats": 377,
-              "morts_predits": 375.96709497423996
+              "tipus": "fons",
+              "n": 4462,
+              "censurats_pertorbacio": 247,
+              "auc": 0.6084576319340862,
+              "morts_observats": 130,
+              "morts_predits": 129.12359049147307,
+              "calibratge_decils": [
+                {
+                  "n": 447,
+                  "p_mitjana": 0.01295921583855695,
+                  "observats": 8,
+                  "predits": 5.7927694798349565
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.016303249318708486,
+                  "observats": 9,
+                  "predits": 7.271249196143984
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.018812057337021137,
+                  "observats": 11,
+                  "predits": 8.390177572311426
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.020806549519876764,
+                  "observats": 8,
+                  "predits": 9.279721085865036
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.022930647985230528,
+                  "observats": 10,
+                  "predits": 10.227069001412815
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.025731384339627215,
+                  "observats": 7,
+                  "predits": 11.476197415473738
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.02919928757964224,
+                  "observats": 16,
+                  "predits": 13.02288226052044
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.03385697544947784,
+                  "observats": 11,
+                  "predits": 15.100211050467117
+                },
+                {
+                  "n": 446,
+                  "p_mitjana": 0.04167470649065044,
+                  "observats": 27,
+                  "predits": 18.586919094830098
+                },
+                {
+                  "n": 447,
+                  "p_mitjana": 0.06706128486490703,
+                  "observats": 23,
+                  "predits": 29.976394334613445
+                }
+              ]
             },
             "parceles": {
               "n": 200,
-              "biaix": -0.0226605,
-              "rmse": 3.0474653373336342,
-              "r2": 0.9489478322244278,
+              "biaix": 0.08821000000000012,
+              "rmse": 3.0167038899931824,
+              "r2": 0.9499732827602774,
               "mitjana_observada": 21.485660499999998
             },
             "increment_ab_parceles": {
               "n": 200,
-              "biaix": -0.0226605,
-              "rmse": 3.0474653373336342,
-              "r2": 0.3079776063459676,
+              "biaix": 0.08821000000000019,
+              "rmse": 3.0167038899931824,
+              "r2": 0.32187779443419995,
               "mitjana_observada": 2.6109259999999996
+            },
+            "nomes_fons": {
+              "parceles": {
+                "n": 200,
+                "biaix": 1.1969455,
+                "rmse": 3.288111774248254,
+                "r2": 0.9405667084268349,
+                "mitjana_observada": 21.485660499999998
+              },
+              "increment_ab_parceles": {
+                "n": 200,
+                "biaix": 1.1969455,
+                "rmse": 3.288111774248254,
+                "r2": 0.19436978899690205,
+                "mitjana_observada": 2.6109259999999996
+              }
+            },
+            "sense_pertorbacions": {
+              "parceles": {
+                "n": 165,
+                "biaix": 0.4516424242424242,
+                "rmse": 2.3098285108324697,
+                "r2": 0.9681258690291583,
+                "mitjana_observada": 20.264940606060605
+              },
+              "increment_ab_parceles": {
+                "n": 165,
+                "biaix": 0.4516424242424242,
+                "rmse": 2.3098285108324697,
+                "r2": 0.480692377385186,
+                "mitjana_observada": 3.2548290909090913
+              },
+              "llindar_m2ha": 2.0,
+              "parceles_excloses": 35
             },
             "comparacio_informe": [
               {
@@ -585,24 +1340,122 @@
               "mitjana_observada": 0.18472183606557377
             },
             "mortalitat": {
-              "n": 3348,
-              "auc": 0.6054143069907696,
-              "morts_observats": 284,
-              "morts_predits": 284.5835789677077
+              "tipus": "fons",
+              "n": 3189,
+              "censurats_pertorbacio": 159,
+              "auc": 0.6145509138381201,
+              "morts_observats": 125,
+              "morts_predits": 125.3281404198148,
+              "calibratge_decils": [
+                {
+                  "n": 319,
+                  "p_mitjana": 0.016449288567595727,
+                  "observats": 7,
+                  "predits": 5.247323053063036
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.020266450391866735,
+                  "observats": 9,
+                  "predits": 6.464997675005488
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.023514362214518986,
+                  "observats": 3,
+                  "predits": 7.501081546431556
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.026439104870212775,
+                  "observats": 15,
+                  "predits": 8.434074453597875
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.02978663221243329,
+                  "observats": 11,
+                  "predits": 9.50193567576622
+                },
+                {
+                  "n": 318,
+                  "p_mitjana": 0.03388413412555808,
+                  "observats": 2,
+                  "predits": 10.77515465192747
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.03910127293583526,
+                  "observats": 14,
+                  "predits": 12.47330606653145
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.046711538007472186,
+                  "observats": 29,
+                  "predits": 14.900980624383628
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.058184633099497986,
+                  "observats": 16,
+                  "predits": 18.560897958739858
+                },
+                {
+                  "n": 319,
+                  "p_mitjana": 0.09864698656541762,
+                  "observats": 19,
+                  "predits": 31.46838871436822
+                }
+              ]
             },
             "parceles": {
               "n": 107,
-              "biaix": -0.4242906542056076,
-              "rmse": 4.279090928360552,
-              "r2": 0.9018467283298648,
+              "biaix": -0.5995616822429906,
+              "rmse": 4.420474701609557,
+              "r2": 0.8952534883000658,
               "mitjana_observada": 27.97638130841121
             },
             "increment_ab_parceles": {
               "n": 107,
-              "biaix": -0.4242906542056076,
-              "rmse": 4.279090928360552,
-              "r2": 0.35778168543789735,
+              "biaix": -0.5995616822429906,
+              "rmse": 4.420474701609557,
+              "r2": 0.3146420179831926,
               "mitjana_observada": 3.077051401869158
+            },
+            "nomes_fons": {
+              "parceles": {
+                "n": 107,
+                "biaix": 1.0071598130841124,
+                "rmse": 4.571778102981071,
+                "r2": 0.8879602744298666,
+                "mitjana_observada": 27.97638130841121
+              },
+              "increment_ab_parceles": {
+                "n": 107,
+                "biaix": 1.0071598130841124,
+                "rmse": 4.571778102981071,
+                "r2": 0.2669224112929406,
+                "mitjana_observada": 3.077051401869158
+              }
+            },
+            "sense_pertorbacions": {
+              "parceles": {
+                "n": 82,
+                "biaix": 0.36613902439024393,
+                "rmse": 4.655746446950552,
+                "r2": 0.8699554604521352,
+                "mitjana_observada": 26.226803658536582
+              },
+              "increment_ab_parceles": {
+                "n": 82,
+                "biaix": 0.36613902439024393,
+                "rmse": 4.655746446950552,
+                "r2": 0.283342164741892,
+                "mitjana_observada": 3.847703658536585
+              },
+              "llindar_m2ha": 2.0,
+              "parceles_excloses": 25
             },
             "comparacio_informe": [
               {

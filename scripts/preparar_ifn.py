@@ -16,9 +16,12 @@ Només es fan servir les parcel·les de les comarques de COMARQUES (comarca del 
 
 Escriu data/ifn_lleida_arbres.csv: un registre per pi (roig o negre) viu a la mesura inicial en una
 parcel·la remesurada sense tallades, amb el seu estat inicial, la competència de la parcel·la i el
-resultat a la mesura final (viu amb diàmetre nou, o mort). Columnes de període:
+resultat a la mesura final (viu amb diàmetre nou, o mort). Per als morts, l'agent causant que anota l'IFN
+(camp Agente de l'IFN3 i l'IFN4) i el grup de causa (vegeu CAUSES). Columnes de període:
     periode   "IFN2-IFN3" o "IFN3-IFN4"
     comarca   comarca de la parcel·la
+    agent     codi d'agent causant de la mort (camp Agente; buit si l'arbre és viu o no en té)
+    causa     grup de causa de la mort (CAUSES); buit si l'arbre és viu
     any_ifn2  any de la mesura inicial; any_ifn3 i dbh_ifn3: any i diàmetre de la mesura final. Els noms
               es mantenen per compatibilitat: a les files IFN3-IFN4 corresponen a l'IFN3 i l'IFN4.
 Una parcel·la remesurada en tots dos períodes manté el mateix número (`parcela`) a totes dues.
@@ -43,7 +46,20 @@ ESPECIES = {"21": "Pinus sylvestris", "22": "Pinus uncinata"}
 COMARQUES = ("Pallars Sobirà", "Alt Urgell", "Alta Ribagorça", "Cerdanya")
 INTERVALS = {"IFN2-IFN3": (8, 14), "IFN3-IFN4": (8, 16)}
 COLUMNES = ["periode", "comarca", "parcela", "ordre", "especie", "dbh", "ht", "f", "bal", "ab", "n", "altitud",
-            "utm_x", "utm_y", "any_ifn2", "any_ifn3", "anys", "mort", "dbh_ifn3", "id_dbh"]
+            "utm_x", "utm_y", "any_ifn2", "any_ifn3", "anys", "mort", "dbh_ifn3", "id_dbh", "agent", "causa"]
+# Grups de causa de mort a partir de l'agent causant de l'IFN (camp Agente; documentador de l'IFN4, annex 8).
+# «fons» és la mortalitat que calibra el model (competència, causa desconeguda o sense agent anotat); la resta
+# són pertorbacions, que l'app tracta com a escenaris a part.
+CAUSES = {
+    "fons": (100, 200, 316),  # sense dany, causa desconeguda, dominància (competència); també sense agent
+    "foc": (421, 413),  # incendi, llamp
+    "sequera": (412, 414),  # sequera, gelada
+    "neu_vent": (410, 411, 415),  # neu, vent, calamarsa
+    "biotic": (300, 310, 311, 312, 313, 314, 315),  # biòtic genèric, fongs, insectes, vesc, epífits, fauna, bestiar
+    # maquinària, aprofitament de fusta, persones, abiòtic genèric, despreniments, erosió
+    "altres": (320, 321, 322, 400, 422, 423),
+}
+CAUSA_PER_AGENT = {agent: causa for causa, agents in CAUSES.items() for agent in agents}
 
 
 def factor_expansio(dbh_cm: pd.Series) -> pd.Series:
@@ -67,6 +83,12 @@ def base_ifn3(dir_ifn: Path) -> Path:
         if (dir_ifn / "ifn3p25" / nom).exists():
             return dir_ifn / "ifn3p25" / nom
     raise FileNotFoundError(dir_ifn / "ifn3p25" / "Ifn3p25.accdb")
+
+
+def causa_mort(agent: pd.Series, mort: pd.Series) -> pd.Series:
+    """Grup de causa (CAUSES) de cada arbre mort; un mort sense agent o amb un codi no previst compta com a «fons»."""
+    causa = pd.to_numeric(agent, errors="coerce").map(CAUSA_PER_AGENT).fillna("fons")
+    return causa.where(mort.astype(bool), None)
 
 
 def ordre_valid(s: pd.Series) -> pd.Series:
@@ -137,7 +159,8 @@ def periode_ifn23(dir_ifn: Path) -> tuple[pd.DataFrame, dict]:
     remesurats["mort"] = remesurats["OrdenIf3"] == "888"
     remesurats["dbh_ifn3"] = (remesurats["Dn1"].astype(float) + remesurats["Dn2"].astype(float)) / 20.0
     remesurats["especie_ifn3"] = remesurats["Especie"].str.lstrip("0")
-    remesurats = remesurats[["parcela", "ordre", "mort", "dbh_ifn3", "especie_ifn3"]]
+    remesurats["agent"] = pd.to_numeric(remesurats["Agente"], errors="coerce").where(remesurats["mort"])
+    remesurats = remesurats[["parcela", "ordre", "mort", "dbh_ifn3", "especie_ifn3", "agent"]]
 
     dades = ifn2[ifn2["especie"].isin(ESPECIES)].merge(remesurats, on=["parcela", "ordre"], how="inner")
     dades = dades[~dades["parcela"].isin(parceles_tallades)]
@@ -203,7 +226,8 @@ def periode_ifn34(dir_ifn: Path) -> tuple[pd.DataFrame, dict]:
     r["dbh_ifn3"] = (pd.to_numeric(r["Dn1"], errors="coerce") + pd.to_numeric(r["Dn2"], errors="coerce")) / 20.0
     r.loc[r["mort"], "dbh_ifn3"] = np.nan  # com a l'IFN2-IFN3: els morts no tenen diàmetre final
     r["especie_ifn3"] = r["Especie"].str.lstrip("0")
-    r = r[["parcela", "ordre", "mort", "dbh_ifn3", "especie_ifn3"]]
+    r["agent"] = pd.to_numeric(r["Agente"], errors="coerce").where(r["mort"])
+    r = r[["parcela", "ordre", "mort", "dbh_ifn3", "especie_ifn3", "agent"]]
 
     dades = ifn3[ifn3["especie"].isin(ESPECIES)].merge(r, on=["parcela", "ordre"], how="inner")
     dades = dades[~dades["parcela"].isin(tallades)]
@@ -245,6 +269,7 @@ def construir(dir_ifn: str | Path) -> tuple[pd.DataFrame, dict]:
         # Errors de mesura evidents: decreixements o creixements de més de 2 cm/any.
         dades = dades[dades["mort"] | dades["id_dbh"].between(-0.2, 2.0)]
         dades["especie"] = dades["especie"].map(ESPECIES)
+        dades["causa"] = causa_mort(dades["agent"], dades["mort"])
         trossos.append(dades)
         remesurades = recompte["parceles_remesurades"] & dins
         recomptes[periode] = {
@@ -257,6 +282,7 @@ def construir(dir_ifn: str | Path) -> tuple[pd.DataFrame, dict]:
         }
     dades = pd.concat(trossos, ignore_index=True)
     dades = dades.sort_values(["periode", "parcela", "ordre"])[COLUMNES].round(4)
+    dades["agent"] = dades["agent"].astype("Int64")
     return dades, recomptes
 
 
@@ -268,6 +294,11 @@ def main(dir_ifn: str) -> None:
         anys_min=("anys", "min"), anys_max=("anys", "max"))
     print(resum.to_string())
     print(dades.groupby(["comarca", "periode"])["parcela"].nunique().unstack().to_string())
+    morts = dades[dades["mort"]]
+    print("Morts per causa:")
+    print(morts.groupby(["periode", "especie", "causa"]).size().unstack(fill_value=0).to_string())
+    print("Morts sense agent:", morts.groupby(["periode", "especie"])["agent"].apply(lambda a: int(a.isna().sum()))
+          .to_dict())
     print("Parcel·les a tots dos períodes:", int(dades.groupby("parcela")["periode"].nunique().eq(2).sum()))
     for periode, r in recomptes.items():
         print(periode, r)

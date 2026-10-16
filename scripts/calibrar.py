@@ -13,6 +13,17 @@ Els models s'ajusten amb les dues remesures juntes (IFN2-IFN3 i IFN3-IFN4) i un 
 coeficients de calibracio.json porten l'efecte de p34 sumat a la constant, de manera que el simulador no
 necessita saber el període. El coeficient de p34, el seu error estàndard i el període de referència es
 desen a part («periode»), i els coeficients originals a «ajust».
+
+Mortalitat de fons i pertorbacions. L'IFN anota l'agent causant de cada arbre mort (scripts/preparar_ifn.py,
+CAUSES). El model de mortalitat s'ajusta només amb les morts de fons (competència, causa desconeguda o sense
+agent). Els arbres morts per una pertorbació (foc, sequera, neu i vent, causes biòtiques, altres) es treuen de
+l'ajust: es tracten com a censurats, és a dir, se sap que no han mort de causa de fons durant el temps que
+han viscut, però no quant de temps ha estat. És la simplificació habitual de riscos competitius quan no se
+sap el moment de la mort; com que són pocs (un 5 % dels pins), sobreestimar-ne o subestimar-ne l'exposició
+gairebé no canvia els coeficients.
+
+Les pertorbacions s'estimen a part, a escala de parcel·la (estimar_pertorbacions), i es desen al bloc
+«pertorbacions» de cada espècie: l'app les aplica com a escenaris.
 """
 
 import json
@@ -35,6 +46,7 @@ from carboni.creixement import (  # noqa: E402
     FORMULA_MORTALITAT,
     PERIODE_REFERENCIA,
     TERME_PERIODE,
+    TIPUS_PERTORBACIO,
     ModelEspecie,
     sdi,
     variables_arbre,
@@ -52,6 +64,12 @@ FORMULA_MORTALITAT_PERIODE = f"{FORMULA_MORTALITAT} + {TERME_PERIODE}"
 VOLUM_INFORME = {"Pinus sylvestris": (30.83, 0.000321), "Pinus uncinata": (77.94, 0.0002743)}
 IAVC_INFORME = {"Pinus sylvestris": (3.9, 0.0162104, -0.0000019), "Pinus uncinata": (3.32, 0.0105025, -0.0000019)}
 CLASSES_AB = [0, 20, 30, 40, 100]
+# Una parcel·la és «afectada» per un tipus de pertorbació si aquesta causa hi mata almenys el 10 % de l'AB
+# inicial de pins de l'espècie: separa els episodis de les morts aïllades.
+LLINDAR_AFECTADA = 0.10
+# Validació de parcel·les «sense pertorbacions»: menys de 2 m²/ha d'AB inicial morta per pertorbacions.
+LLINDAR_VALIDACIO = 2.0
+CLAU_PARCELA = ["periode", "parcela", "especie"]
 
 
 def ajustar_creixement(dades: pd.DataFrame):
@@ -65,6 +83,8 @@ def ajustar_creixement(dades: pd.DataFrame):
 
 
 def ajustar_mortalitat(dades: pd.DataFrame):
+    """GLM binomial cloglog de la mortalitat de fons. Els morts per pertorbacions es treuen (censurats)."""
+    dades = fons(dades)
     familia = sm.families.Binomial(link=sm.families.links.CLogLog())
     return smf.glm(FORMULA_MORTALITAT_PERIODE, dades, family=familia, offset=np.log(dades["anys"])).fit()
 
@@ -87,8 +107,84 @@ def preparar(dades: pd.DataFrame) -> pd.DataFrame:
     dades[TERME_PERIODE] = (dades["periode"] == "IFN3-IFN4").astype(int)
     dades["dd10"] = dades["id_dbh"] * 10.0
     dades["y"] = np.log(dades["dd10"] + 1.0)
-    dades["m"] = dades["mort"].astype(int)
+    # Morts per pertorbacions: fora de l'ajust de mortalitat. m = mort de fons.
+    dades["pertorbat"] = dades["mort"] & (dades["causa"].fillna("fons") != "fons")
+    dades["m"] = (dades["mort"] & ~dades["pertorbat"]).astype(int)
+    dades["g"] = np.pi * (dades["dbh"] / 200.0) ** 2 * dades["f"]
     return dades
+
+
+def fons(dades: pd.DataFrame) -> pd.DataFrame:
+    """Arbres que compten per a la mortalitat de fons: tots menys els morts per pertorbacions."""
+    return dades[~dades["pertorbat"]]
+
+
+def unitats_parcela(dades: pd.DataFrame) -> pd.DataFrame:
+    """Per parcel·la, període i espècie: AB inicial de pins (g0), durada de l'interval i AB inicial dels pins
+    morts per cada causa (m²/ha)."""
+    u = dades.groupby(CLAU_PARCELA).agg(g0=("g", "sum"), anys=("anys", "first"))
+    morts = dades[dades["mort"]].pivot_table(index=CLAU_PARCELA, columns="causa", values="g", aggfunc="sum")
+    return u.join(morts.reindex(columns=["fons", *TIPUS_PERTORBACIO])).fillna(0.0)
+
+
+def estimar_pertorbacions(dades: pd.DataFrame) -> dict:
+    """Freqüència i severitat de cada tipus de pertorbació a les parcel·les (totes les parcel·les remesurades on
+    hi ha l'espècie, no només les pinedes: les pertorbacions són rares i calen totes les parcel·les; la fracció es
+    mesura sobre l'AB de pins de l'espècie, de manera que no depèn de la composició).
+
+    - taxa_perdua_ab: AB inicial morta per la causa / suma de (AB inicial · anys). És la fracció de l'AB de
+      pins que es perd cada any de mitjana, comptant totes les morts d'aquesta causa (també les aïllades).
+    - parceles_afectades: parcel·les on la causa mata almenys LLINDAR_AFECTADA de l'AB inicial.
+    - taxa_episodis: parcel·les afectades / anys-parcel·la observats (taxa de Poisson); p_anual = 1 − e^(−taxa)
+      és la probabilitat anual que una parcel·la sigui afectada.
+    - fraccio_mitjana i fraccio_mediana: fracció de l'AB inicial morta a les parcel·les afectades.
+    """
+    u = unitats_parcela(dades)
+    exposicio = float((u["g0"] * u["anys"]).sum())
+    anys_parcela = float(u["anys"].sum())
+    causes = {}
+    for causa in TIPUS_PERTORBACIO:
+        fraccio = u[causa] / u["g0"]
+        afectada = fraccio >= LLINDAR_AFECTADA
+        taxa = float(afectada.sum()) / anys_parcela
+        causes[causa] = {
+            "taxa_perdua_ab": float(u[causa].sum()) / exposicio,
+            "parceles_afectades": int(afectada.sum()),
+            "parceles_amb_morts": int((u[causa] > 0).sum()),
+            "taxa_episodis": taxa,
+            "p_anual": float(1.0 - np.exp(-taxa)),
+            "fraccio_mitjana": float(fraccio[afectada].mean()) if afectada.any() else None,
+            "fraccio_mediana": float(fraccio[afectada].median()) if afectada.any() else None,
+        }
+    return {
+        "parceles": int(len(u)),
+        "anys_parcela": anys_parcela,
+        "causes": causes,
+        "taxa_perdua_ab_total": float(sum(c["taxa_perdua_ab"] for c in causes.values())),
+        "taxa_perdua_ab_fons_observada": float(u["fons"].sum()) / exposicio,
+    }
+
+
+def resum_pertorbacions(dades: pd.DataFrame) -> dict:
+    """Estimació de pertorbacions amb tots dos períodes junts, i per període com a referència."""
+    return estimar_pertorbacions(dades) | {
+        "per_periode": {p: {k: v for k, v in estimar_pertorbacions(d).items() if k != "causes"}
+                        for p, d in dades.groupby("periode")}}
+
+
+def morts_per_causa(dades: pd.DataFrame) -> dict:
+    morts = dades[dades["mort"]]
+    return {"per_causa": {c: int(n) for c, n in morts["causa"].value_counts().items()},
+            "sense_agent": int(morts["agent"].isna().sum())}
+
+
+def calibratge_mortalitat(observat: np.ndarray, predit: np.ndarray, grups: int = 10) -> list[dict]:
+    """Morts observades i predites per decils de probabilitat predita."""
+    t = pd.DataFrame({"o": observat, "p": predit})
+    t["decil"] = pd.qcut(t["p"].rank(method="first"), grups, labels=False)
+    r = t.groupby("decil").agg(n=("o", "size"), p_mitjana=("p", "mean"), observats=("o", "sum"), predits=("p", "sum"))
+    return [{"n": int(f.n), "p_mitjana": float(f.p_mitjana), "observats": int(f.observats),
+             "predits": float(f.predits)} for f in r.itertuples()]
 
 
 def vius(dades: pd.DataFrame) -> pd.DataFrame:
@@ -109,9 +205,11 @@ def metriques(observat: np.ndarray, predit: np.ndarray) -> dict:
 
 def validar_especie(dades: pd.DataFrame) -> pd.DataFrame:
     """Validació creuada per parcel·les: cada parcel·la (amb els seus dos períodes, si en té) es prediu amb
-    models que no l'han vist. Les prediccions fan servir el coeficient del període de cada arbre."""
+    models que no l'han vist. Les prediccions fan servir el coeficient del període de cada arbre. La mortalitat
+    de fons i la taxa de pèrdua per pertorbacions també s'estimen sense la parcel·la."""
     pred_creix = pd.Series(np.nan, index=dades.index)
     pred_mort = pd.Series(np.nan, index=dades.index)
+    pred_pert = pd.Series(np.nan, index=dades.index)
     plecs = GroupKFold(n_splits=PLECS)
     for entrenament, prova in plecs.split(dades, groups=dades["parcela"]):
         entren = dades.iloc[entrenament]
@@ -123,40 +221,65 @@ def validar_especie(dades: pd.DataFrame) -> pd.DataFrame:
         pred_creix.loc[prova_df.index] = model.increment_diametral(prova_df)
         p_anual = model.mortalitat_anual(prova_df)
         pred_mort.loc[prova_df.index] = 1.0 - (1.0 - p_anual) ** prova_df["anys"]
-    return dades.assign(id_predit=pred_creix, p_mort_periode=pred_mort)
+        taxa = estimar_pertorbacions(entren)["taxa_perdua_ab_total"]
+        pred_pert.loc[prova_df.index] = 1.0 - (1.0 - taxa) ** prova_df["anys"]
+    return dades.assign(id_predit=pred_creix, p_mort_periode=pred_mort, p_pert_periode=pred_pert)
+
+
+def metriques_parceles(parceles: pd.DataFrame, predita: str) -> dict:
+    """AB final i increment d'AB de les parcel·les, observats vs predits (columna `predita`)."""
+    return {
+        "parceles": metriques(parceles["ab_2001_observada"].to_numpy(), parceles[predita].to_numpy()),
+        "increment_ab_parceles": metriques((parceles["ab_2001_observada"] - parceles["ab_1990"]).to_numpy(),
+                                           (parceles[predita] - parceles["ab_1990"]).to_numpy()),
+    }
 
 
 def metriques_validacio(validat: pd.DataFrame, parceles: pd.DataFrame) -> dict:
+    """Mortalitat: només la de fons (els morts per pertorbacions no hi compten). Parcel·les: (1) totes, amb el
+    model complet (mortalitat de fons i pèrdua esperada per pertorbacions); (2) totes, només amb la mortalitat de
+    fons; (3) les que perden menys de LLINDAR_VALIDACIO m²/ha per pertorbacions, només amb la de fons."""
     v = vius(validat)
-    mort_obs = validat["m"].to_numpy()
-    mort_pred = validat["p_mort_periode"].to_numpy()
-    increment_obs = parceles["ab_2001_observada"] - parceles["ab_1990"]
-    increment_pred = parceles["ab_2001_predita"] - parceles["ab_1990"]
+    f = fons(validat)
+    mort_obs = f["m"].to_numpy()
+    mort_pred = f["p_mort_periode"].to_numpy()
+    estables = parceles[parceles["perdua_pertorbacions"] <= LLINDAR_VALIDACIO]
     return {
         "creixement": metriques(v["id_dbh"].to_numpy(), v["id_predit"].to_numpy()),
         "mortalitat": {
-            "n": int(len(validat)),
+            "tipus": "fons",
+            "n": int(len(f)),
+            "censurats_pertorbacio": int(validat["pertorbat"].sum()),
             "auc": float(roc_auc_score(mort_obs, mort_pred)),
             "morts_observats": int(mort_obs.sum()),
             "morts_predits": float(mort_pred.sum()),
+            "calibratge_decils": calibratge_mortalitat(mort_obs, mort_pred),
         },
-        "parceles": metriques(parceles["ab_2001_observada"].to_numpy(), parceles["ab_2001_predita"].to_numpy()),
-        "increment_ab_parceles": metriques(increment_obs.to_numpy(), increment_pred.to_numpy()),
+        **metriques_parceles(parceles, "ab_2001_predita"),
+        "nomes_fons": metriques_parceles(parceles, "ab_2001_predita_fons"),
+        "sense_pertorbacions": metriques_parceles(estables, "ab_2001_predita_fons")
+        | {"llindar_m2ha": LLINDAR_VALIDACIO, "parceles_excloses": int(len(parceles) - len(estables))},
     }
 
 
 def validar_parceles(dades: pd.DataFrame) -> pd.DataFrame:
     """AB a la mesura final dels pins presents a la inicial: observada vs predita (creixement i mortalitat
-    esperats). Per compatibilitat, les columnes es diuen ab_1990 (mesura inicial) i ab_2001_* (final)."""
+    esperats). Per compatibilitat, les columnes es diuen ab_1990 (mesura inicial) i ab_2001_* (final).
+    ab_2001_predita inclou la pèrdua esperada per pertorbacions; ab_2001_predita_fons, només la mortalitat de
+    fons. perdua_pertorbacions és l'AB inicial dels pins morts per pertorbacions (observada)."""
     d = dades.copy()
     d["g_1990"] = np.pi * (d["dbh"] / 200.0) ** 2 * d["f"]
     d["g_2001_obs"] = np.where(d["mort"], 0.0, np.pi * (d["dbh_ifn3"] / 200.0) ** 2 * d["f"])
     dbh_pred = d["dbh"] + d["id_predit"] * d["anys"]
-    d["g_2001_pred"] = np.pi * (dbh_pred / 200.0) ** 2 * d["f"] * (1.0 - d["p_mort_periode"])
+    d["g_2001_fons"] = np.pi * (dbh_pred / 200.0) ** 2 * d["f"] * (1.0 - d["p_mort_periode"])
+    d["g_2001_pred"] = d["g_2001_fons"] * (1.0 - d["p_pert_periode"])
+    d["g_pert"] = np.where(d["pertorbat"], d["g_1990"], 0.0)
     parceles = d.groupby(["periode", "parcela", "especie"]).agg(
         ab_1990=("g_1990", "sum"),
         ab_2001_observada=("g_2001_obs", "sum"),
         ab_2001_predita=("g_2001_pred", "sum"),
+        ab_2001_predita_fons=("g_2001_fons", "sum"),
+        perdua_pertorbacions=("g_pert", "sum"),
         ab_parcela=("ab", "first"),
         altitud=("altitud", "first"),
         anys=("anys", "first"),
@@ -210,6 +333,7 @@ def sdi_maxim(especie: str, lleida: pd.DataFrame, andorra: pd.DataFrame) -> dict
 
 def mostra(dades: pd.DataFrame) -> dict:
     return {"arbres": int(len(dades)), "parceles": int(dades["parcela"].nunique()), "morts": int(dades["mort"].sum()),
+            "morts_fons": int(dades["m"].sum()), "morts_pertorbacio": int(dades["pertorbat"].sum()),
             "arbres_creixement": int(len(vius(dades))), "anys_min": int(dades["anys"].min()),
             "anys_max": int(dades["anys"].max())}
 
@@ -227,6 +351,14 @@ def main() -> None:
             "periodes": PERIODES,
             "terme_periode": TERME_PERIODE,
             "periode_referencia": PERIODE_REFERENCIA,
+        },
+        "pertorbacions": {
+            "descripcio": "Mortalitat per pertorbacions (agent causant de l'IFN), estimada a part de la de fons. "
+                          "Fracció de l'AB inicial de pins de l'espècie; tots dos períodes junts; totes les "
+                          "parcel·les remesurades on hi ha l'espècie.",
+            "tipus": list(TIPUS_PERTORBACIO),
+            "llindar_afectada": LLINDAR_AFECTADA,
+            "totes_especies": resum_pertorbacions(lleida),
         },
         "especies": {},
     }
@@ -249,6 +381,7 @@ def main() -> None:
             "correccio_biaix": correccio,
             "mortalitat": plegar_periode({k: float(v) for k, v in model_m.params.items()}),
             **sdi_maxim(especie, lleida, andorra),
+            "pertorbacions": resum_pertorbacions(dades),
             "periode": {
                 "terme": TERME_PERIODE,
                 "codificacio": "p34 = 1 a IFN3-IFN4, 0 a IFN2-IFN3",
@@ -274,15 +407,18 @@ def main() -> None:
                 "ab_max": float(dades["ab"].max()),
                 "parceles_dos_periodes": int(dades.groupby("parcela")["periode"].nunique().eq(2).sum()),
                 "comarques": comarques,
-                "per_periode": {p: mostra(d) for p, d in dades.groupby("periode")},
+                "per_periode": {p: mostra(d) | {"morts_causa": morts_per_causa(d)}
+                                for p, d in dades.groupby("periode")},
             },
             "validacio": metr,
         }
         validacions_arbres.append(validat.loc[~validat["mort"], ["periode", "especie", "parcela", "dbh", "bal", "ab",
                                                                  "altitud", "id_dbh", "id_predit"]])
         validacions_parceles.append(parceles)
-        print(especie, json.dumps({k: metr[k] for k in ("creixement", "mortalitat", "parceles")}, indent=1,
-                                  ensure_ascii=False))
+        print(especie, json.dumps({k: metr[k] for k in ("creixement", "mortalitat", "parceles", "sense_pertorbacions")},
+                                  indent=1, ensure_ascii=False))
+        print("  pertorbacions:",
+              json.dumps(sortida["especies"][especie]["pertorbacions"]["causes"], ensure_ascii=False))
         print("  període:", json.dumps(sortida["especies"][especie]["periode"], ensure_ascii=False))
 
     (DATA / "calibracio.json").write_text(json.dumps(sortida, indent=2, ensure_ascii=False), encoding="utf-8")

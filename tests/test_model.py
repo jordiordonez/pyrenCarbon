@@ -5,7 +5,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from carboni.creixement import carregar_models, simular, sdi
+from carboni.creixement import (
+    EPISODIS,
+    SENSE_PERTORBACIONS,
+    Pertorbacio,
+    carregar_models,
+    carregar_pertorbacions,
+    pertorbacio_episodi,
+    pertorbacio_risc_mitja,
+    sdi,
+    simular,
+)
 from carboni.equacions import CO2_PER_C, FRACCIO_CARBONI, alcada, biomassa_aeria_kg
 from carboni.intervencio import aclarir, area_basimetrica
 from carboni.inventari import (
@@ -29,6 +39,11 @@ def inf():
 @pytest.fixture(scope="module")
 def models():
     return carregar_models(DATA / "calibracio.json")
+
+
+@pytest.fixture(scope="module")
+def pertorbacions():
+    return carregar_pertorbacions(DATA / "calibracio.json")
 
 
 @pytest.fixture(scope="module")
@@ -128,3 +143,46 @@ def test_creixement_validat_sense_biaix_greu():
         assert abs(v["parceles"]["biaix"]) < 0.5, especie
         assert v["parceles"]["r2"] > 0.9, especie
         assert v["mortalitat"]["morts_predits"] == pytest.approx(v["mortalitat"]["morts_observats"], rel=0.05)
+        assert v["mortalitat"]["tipus"] == "fons"
+        assert abs(v["sense_pertorbacions"]["parceles"]["biaix"]) < 0.5, especie
+
+
+def test_pertorbacions_calibrades(pertorbacions):
+    for sp in ("Ps", "Pu"):
+        p = pertorbacions[sp]
+        assert 0.0 < p["taxa_anual"] < 0.02
+        assert set(p["tipus"]) >= set(EPISODIS)
+        for t in EPISODIS:
+            assert 0.0 < p["tipus"][t]["severitat"] <= 1.0, (sp, t)
+
+
+def test_sense_pertorbacions_es_el_mode_per_defecte(rodal_pu, models):
+    a = simular(rodal_pu, models, 10).serie
+    b = simular(rodal_pu, models, 10, SENSE_PERTORBACIONS).serie
+    pd.testing.assert_frame_equal(a, b)
+    assert (b["morts_pertorbacio"] == 0).all()
+
+
+def test_risc_mitja_mata_mes_que_sense_pertorbacions(rodal_pu, models, pertorbacions):
+    sense = simular(rodal_pu, models, 30, SENSE_PERTORBACIONS).serie
+    risc = simular(rodal_pu, models, 30, pertorbacio_risc_mitja(pertorbacions)).serie
+    assert sense["morts_peus"].sum() <= risc["morts_peus"].sum()
+    assert (risc["morts_pertorbacio"].iloc[1:] > 0).all()
+    assert risc["carboni"].iloc[-1] < sense["carboni"].iloc[-1]
+    # Sense autoaclarida, la pèrdua anual per pertorbacions és la taxa calibrada sobre els pins vius.
+    densitat_previa = risc["densitat"].shift(1).iloc[1:]
+    assert (risc["morts_pertorbacio"].iloc[1:] <= densitat_previa * pertorbacions["Pu"]["taxa_anual"] + 1e-9).all()
+
+
+def test_episodi_puntual(rodal_pu, models):
+    sense = simular(rodal_pu, models, 20, SENSE_PERTORBACIONS).serie
+    foc = simular(rodal_pu, models, 20, pertorbacio_episodi("foc", 5, 0.5)).serie
+    pd.testing.assert_frame_equal(sense.iloc[:5], foc.iloc[:5])
+    assert foc["morts_pertorbacio"].iloc[5] > 0
+    assert (foc["morts_pertorbacio"].drop(index=5) == 0).all()
+    assert foc["ab"].iloc[5] < 0.6 * sense["ab"].iloc[5]
+    assert foc["carboni"].iloc[-1] < sense["carboni"].iloc[-1]
+    with pytest.raises(ValueError):
+        pertorbacio_episodi("altres", 5, 0.5)
+    with pytest.raises(ValueError):
+        Pertorbacio("episodi", severitat=1.5)

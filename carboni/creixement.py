@@ -4,8 +4,14 @@ Cada any:
 1. increment diametral de cada pi, en funció de la mida, la competència (BAL i AB) i l'altitud
    (model lineal mixt calibrat amb les remesures IFN2–IFN3 i IFN3–IFN4 de les comarques pirinenques de
    Lleida, amb un terme de període);
-2. mortalitat individual, en funció de la mida i la competència (GLM binomial cloglog, mateixes dades);
-3. autoaclarida: si l'índex de densitat de Reineke supera el màxim observat, moren els pins més petits.
+2. mortalitat de fons individual, en funció de la mida i la competència (GLM binomial cloglog, mateixes dades,
+   ajustat només amb els pins morts per competència o causa desconeguda);
+3. pertorbacions (foc, sequera, neu i vent, plagues…), segons l'escenari triat (Pertorbacio):
+   - sense pertorbacions: només la mortalitat de fons;
+   - risc mitjà: cada any es perd la fracció de pins que es va perdre de mitjana per pertorbacions a les
+     parcel·les de calibratge (taxa_perdua_ab_total de calibracio.json), igual per a totes les mides;
+   - episodi puntual: l'any indicat mor una fracció (severitat) dels pins de totes les mides;
+4. autoaclarida: si l'índex de densitat de Reineke supera el màxim observat, moren els pins més petits.
 
 Els arbres d'altres espècies compten per a la competència però no creixen ni moren.
 
@@ -17,7 +23,7 @@ període.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -40,6 +46,19 @@ TERME_PERIODE = "p34"
 PERIODE_REFERENCIA = "IFN3-IFN4"
 EXPONENT_REINEKE = 1.605
 DQ_REFERENCIA_REINEKE = 25.0
+# Tipus de pertorbació (grups de causa de scripts/preparar_ifn.py, CAUSES, llevat de «fons»).
+TIPUS_PERTORBACIO = {
+    "foc": "Foc",
+    "sequera": "Sequera",
+    "neu_vent": "Neu o vent",
+    "biotic": "Plaga o causa biòtica",
+    "altres": "Altres (aprofitaments, despreniments, erosió)",
+}
+# Tipus que es poden simular com a episodi puntual.
+EPISODIS = ("foc", "sequera", "neu_vent", "biotic")
+MODES_PERTORBACIO = {"cap": "Sense pertorbacions", "risc_mitja": "Risc mitjà", "episodi": "Episodi puntual"}
+# Amb menys parcel·les afectades, la severitat per defecte d'un episodi es pren de totes dues espècies juntes.
+MIN_PARCELES_SEVERITAT = 3
 
 
 def variables_arbre(arbres: pd.DataFrame) -> pd.DataFrame:
@@ -97,6 +116,67 @@ def carregar_models(ruta: Path) -> dict[str, ModelEspecie]:
         )
         for nom, p in dades["especies"].items()
     }
+
+
+@dataclass(frozen=True)
+class Pertorbacio:
+    """Escenari de pertorbacions. `taxa_anual`: fracció dels pins de cada espècie (codi) que mor cada any en el
+    mode «risc_mitja». `any_episodi` i `severitat` (fracció dels pins que mor): mode «episodi»."""
+
+    mode: str = "cap"
+    taxa_anual: dict[str, float] = field(default_factory=dict)
+    tipus: str = ""
+    any_episodi: int = 0
+    severitat: float = 0.0
+
+    def __post_init__(self):
+        if self.mode not in MODES_PERTORBACIO:
+            raise ValueError(f"Mode de pertorbació desconegut: {self.mode}")
+        if not 0.0 <= self.severitat <= 1.0:
+            raise ValueError("La severitat ha d'estar entre 0 i 1.")
+
+    def supervivencia(self, any_: int, sp: np.ndarray, es_pi: np.ndarray) -> np.ndarray:
+        """Fracció de cada registre que sobreviu a les pertorbacions l'any `any_`."""
+        factor = np.ones(len(sp))
+        if self.mode == "risc_mitja":
+            for codi, taxa in self.taxa_anual.items():
+                factor[(sp == codi) & es_pi] = 1.0 - taxa
+        elif self.mode == "episodi" and any_ == self.any_episodi:
+            factor[es_pi] = 1.0 - self.severitat
+        return factor
+
+
+SENSE_PERTORBACIONS = Pertorbacio()
+
+
+def carregar_pertorbacions(ruta: Path) -> dict[str, dict]:
+    """Paràmetres de pertorbacions per espècie (codi): taxa anual total de pèrdua d'AB i, per tipus, probabilitat
+    anual d'episodi i severitat per defecte (fracció mitjana d'AB morta a les parcel·les afectades; si l'espècie
+    en té menys de MIN_PARCELES_SEVERITAT, la de totes dues espècies juntes)."""
+    dades = json.loads(Path(ruta).read_text(encoding="utf-8"))
+    conjunt = dades["pertorbacions"]["totes_especies"]["causes"]
+    codi_per_nom = {nom: codi for codi, nom in ESPECIES.items()}
+    resultat = {}
+    for nom, p in dades["especies"].items():
+        pert = p["pertorbacions"]
+        tipus = {}
+        for t, c in pert["causes"].items():
+            propi = c["parceles_afectades"] >= MIN_PARCELES_SEVERITAT
+            font = c if propi else conjunt[t]
+            tipus[t] = {"p_anual": c["p_anual"], "severitat": font["fraccio_mitjana"] or 0.0,
+                        "parceles_afectades": font["parceles_afectades"], "severitat_conjunta": not propi}
+        resultat[codi_per_nom[nom]] = {"taxa_anual": pert["taxa_perdua_ab_total"], "tipus": tipus}
+    return resultat
+
+
+def pertorbacio_risc_mitja(parametres: dict[str, dict]) -> Pertorbacio:
+    return Pertorbacio("risc_mitja", taxa_anual={sp: p["taxa_anual"] for sp, p in parametres.items()})
+
+
+def pertorbacio_episodi(tipus: str, any_episodi: int, severitat: float) -> Pertorbacio:
+    if tipus not in EPISODIS:
+        raise ValueError(f"Tipus d'episodi desconegut: {tipus}")
+    return Pertorbacio("episodi", tipus=tipus, any_episodi=int(any_episodi), severitat=float(severitat))
 
 
 def _competencia(arbres: pd.DataFrame) -> pd.DataFrame:
@@ -182,7 +262,7 @@ def _resum_any(any_: int, arbres: pd.DataFrame, habitat: str, factor_alcada: flo
         "co2": c_total * CO2_PER_C,
         "morts_peus": morts_n,
         "morts_carboni": morts_c,
-    }
+    }  # morts_peus: mortalitat de fons, pertorbacions i autoaclarida
 
 
 @dataclass(frozen=True)
@@ -193,7 +273,8 @@ class Simulacio:
     factor_alcada: float
 
 
-def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int) -> Simulacio:
+def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int,
+            pertorbacio: Pertorbacio = SENSE_PERTORBACIONS) -> Simulacio:
     if not np.isfinite(rodal.altitud):
         raise ValueError("Cal l'altitud del rodal per simular el creixement.")
     factor = factor_alcada_local(rodal)
@@ -207,7 +288,9 @@ def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int) -> Simulac
     # Un rodal que ja parteix per sobre del màxim no s'aclareix de cop: el seu límit és la densitat inicial.
     sdi_max = max(models[sp_dominant].sdi_max, _sdi_rodal(arbres["dbh"].to_numpy(), arbres["f"].to_numpy()))
 
-    files = [_resum_any(0, arbres, rodal.habitat, factor, 0.0, 0.0) | {"increment_brut": 0.0}]
+    sp_arbres = arbres["sp"].to_numpy()
+    files = [_resum_any(0, arbres, rodal.habitat, factor, 0.0, 0.0) | {"increment_brut": 0.0,
+                                                                       "morts_pertorbacio": 0.0}]
     inicials = estoc(arbres, rodal.habitat, factor)
     for any_ in range(1, anys + 1):
         comp = _competencia(arbres)
@@ -221,8 +304,11 @@ def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int) -> Simulac
         abans = estoc(arbres, rodal.habitat, factor)
         crescuts = estoc(arbres.assign(dbh=arbres["dbh"] + increment), rodal.habitat, factor)
         increment_brut = float((crescuts["cat"] + crescuts["cst"]).sum() - (abans["cat"] + abans["cst"]).sum())
-        morts = arbres["f"].to_numpy() * p_mort
-        arbres["f"] = arbres["f"] - morts
+        f = arbres["f"].to_numpy()
+        supervivents_fons = f * (1.0 - p_mort)
+        morts_pert = supervivents_fons * (1.0 - pertorbacio.supervivencia(any_, sp_arbres, es_pi))
+        morts = f - supervivents_fons + morts_pert
+        arbres["f"] = f - morts
         arbres["dbh"] = arbres["dbh"] + increment
         arbres, retirats = _autoaclarida(arbres, es_pi, sdi_max)
         f_abans = abans["f"].to_numpy()
@@ -230,7 +316,7 @@ def simular(rodal: Rodal, models: dict[str, ModelEspecie], anys: int) -> Simulac
         fraccio_morta = np.divide(f_abans - f_despres, f_abans, out=np.zeros_like(f_abans), where=f_abans > 0)
         c_mort = float(np.sum((abans["cat"] + abans["cst"]).to_numpy() * fraccio_morta))
         resum = _resum_any(any_, arbres, rodal.habitat, factor, float(morts[es_pi].sum() + retirats), c_mort)
-        files.append(resum | {"increment_brut": increment_brut})
+        files.append(resum | {"increment_brut": increment_brut, "morts_pertorbacio": float(morts_pert.sum())})
     return Simulacio(
         serie=pd.DataFrame(files),
         arbres_inicials=inicials,
