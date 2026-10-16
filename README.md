@@ -52,9 +52,9 @@ docs/metode.md               metodologia
 
 - **BD-INF1-AND**: Beltran Barba, M., Busquets Olivé, E., Piqué Nicolau, M., Domènech Ferrés, M. i Travesset-Baro, O. (2023). *1r Inventari Nacional Forestal (INF1) del Principat d'Andorra. Base de dades.* Andorra Recerca + Innovació i CTFC. [doi:10.5281/zenodo.11388445](https://doi.org/10.5281/zenodo.11388445). CC BY-SA 4.0.
 - **Equacions d'alçada, biomassa i carboni**: Beltran Barba, M. et al. (2023). *1r INF del Principat d'Andorra. Estimació de l'estoc i l'embornal de carboni total als boscos d'Andorra.* [doi:10.5281/zenodo.12519202](https://doi.org/10.5281/zenodo.12519202). CC BY-SA 4.0.
-- **Segon, Tercer i Quart Inventari Forestal Nacional**, província de Lleida (IFN4: fitxer de Catalunya). Ministerio para la Transición Ecológica y el Reto Demográfico, Banco de Datos de la Naturaleza i [Cuarto Inventario Forestal Nacional](https://www.miteco.gob.es/es/biodiversidad/temas/inventarios-nacionales/inventario-forestal-nacional/cuarto_inventario.html).
+- **Segon, Tercer i Quart Inventari Forestal Nacional**, província de Lleida (IFN4: fitxer de Catalunya). Ministerio para la Transición Ecológica y el Reto Demográfico, Banco de Datos de la Naturaleza i [Cuarto Inventario Forestal Nacional](https://www.miteco.gob.es/es/biodiversidad/temas/inventarios-nacionales/inventario-forestal-nacional/cuarto_inventario.html). IFN2, IFN3 i IFN4: reutilització amb citació de la font (MITECO).
 - **Límits comarcals**: Divisions administratives v2r2, Institut Cartogràfic i Geològic de Catalunya (ICGC). CC BY 4.0.
 
 ## Llicència
 
-El codi es distribueix amb llicència [MIT](LICENSE). Les dades de `data/` mantenen la llicència de la seva font: les derivades de la BD-INF1-AND, CC BY-SA 4.0; les derivades de l'IFN, reutilització amb citació del MITECO; la taula de comarques, CC BY 4.0 (ICGC). El detall és a [data/LLICENCIES.md](data/LLICENCIES.md).
+El codi es distribueix amb llicència [MIT](LICENSE). Les dades de `data/` mantenen la llicència de la seva font: les derivades de la BD-INF1-AND, CC BY-SA 4.0; les derivades de l'IFN (IFN2, IFN3 i IFN4), reutilització amb citació del MITECO; la taula de comarques, CC BY 4.0 (ICGC). El detall és a [data/LLICENCIES.md](data/LLICENCIES.md).
