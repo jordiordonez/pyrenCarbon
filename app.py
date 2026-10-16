@@ -75,7 +75,7 @@ TEXTURA = (
     "</g></svg>"
 )
 
-st.set_page_config(page_title="pyrenCarbon · Carboni a les pinedes d'Andorra", page_icon="🌲", layout="wide")
+st.set_page_config(page_title="pyrenCarbon · Carboni als boscos de pi d'Andorra", page_icon="🌲", layout="wide")
 st.markdown(
     f"""
     <style>
@@ -219,8 +219,8 @@ st.markdown(
         <span>Dades del 1r Inventari Nacional Forestal d'Andorra · Andorra Recerca + Innovació</span>
       </div>
       <h1>pyrenCarbon</h1>
-      <div class="lema">Carboni a les pinedes d'Andorra</div>
-      <p>Explora l'estoc i la captació estimada de CO₂ de les pinedes de pi roig i pi negre,
+      <div class="lema">Carboni als boscos de pi d'Andorra</div>
+      <p>Explora l'estoc i la captació estimada de CO₂ dels boscos de pi roig i de pi negre,
       amb i sense una aclarida.</p>
     </div>
     """,
@@ -244,7 +244,7 @@ with st.sidebar:
         opcions = pinars(resum, sp_filtre).sort_values("parcela")
         fila = st.selectbox(
             "Parcel·la", list(opcions.itertuples(index=False)), format_func=etiqueta_parcela_curta,
-            help="Pinedes amb almenys un 70 % de l'àrea basimètrica de pi roig o pi negre.",
+            help="Parcel·les amb almenys un 70 % de l'àrea basimètrica de pi roig o pi negre.",
         )
         codi_seleccionat = fila.parcela
         rodal = rodal_de_parcela(resum, arbres_inf, codi_seleccionat)
@@ -548,7 +548,7 @@ with tabs[2]:
                       font=dict(family=FONT))
     with st.container(border=True):
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False, "locale": "ca"})
-    st.caption(f"{len(mapa)} pinedes del 1r INF d'Andorra (2022), acolorits pel CO₂ emmagatzemat"
+    st.caption(f"{len(mapa)} parcel·les de pi del 1r INF d'Andorra (2022), acolorides pel CO₂ emmagatzemat"
                + (". En blau, la parcel·la seleccionada." if not seleccionada.empty else "."))
 
 with tabs[3]:
@@ -617,7 +617,7 @@ with tabs[4]:
          "AUC mortalitat de fons": "{:.2f}", "Morts de fons predits": "{:,.0f}",
          "Morts de fons observats": "{:,.0f}"}, decimal=",", thousands=" ").hide(axis="index")
     st.dataframe(resum_validacio, hide_index=True, width="stretch")
-    st.caption("AB i increment d'AB: parcel·les de pineda, amb la mortalitat de fons i la pèrdua mitjana per "
+    st.caption("AB i increment d'AB: parcel·les de pi, amb la mortalitat de fons i la pèrdua mitjana per "
                "pertorbacions (escenari de risc mitjà). «Sense pertorbacions»: només les parcel·les que hi van "
                "perdre menys de 2 m²/ha, amb la mortalitat de fons.")
 
@@ -651,7 +651,7 @@ with tabs[4]:
                              line=dict(color=GRIS_REFERENCIA, dash="dash")))
     fig.update_xaxes(title="AB observada a la remesura (m²/ha)")
     with st.container(border=True):
-        st.plotly_chart(estil(fig, "Àrea basimètrica predita i observada", "Parcel·les de pineda del Pirineu de Lleida, IFN3 i IFN4",
+        st.plotly_chart(estil(fig, "Àrea basimètrica predita i observada", "Parcel·les de pi del Pirineu de Lleida, IFN3 i IFN4",
                               "AB predita (m²/ha)"), width="stretch", config=CONFIG_GRAFIC)
 
     fig = go.Figure()

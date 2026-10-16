@@ -1,4 +1,4 @@
-"""Simulador de creixement arbre a arbre per a pinedes de pi roig i pi negre.
+"""Simulador de creixement arbre a arbre per a boscos de pi roig i de pi negre.
 
 Cada any:
 1. increment diametral de cada pi, en funció de la mida, la competència (BAL i AB) i l'altitud

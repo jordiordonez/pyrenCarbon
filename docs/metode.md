@@ -101,13 +101,13 @@ Mortalitat anual per pertorbacions per classes diamètriques (% d'arbres per any
 | Total amb el risc uniforme | 0,74 | 0,67 | 0,65 | 0,64 | 0,81 |
 | Total amb el risc segons la mida | 0,62 | 0,59 | 0,64 | 0,71 | 1,04 |
 
-La validació creuada de les parcel·les de pineda de pi negre (307) millora una mica: AB final R² 0,934 → 0,935, RMSE 3,57 → 3,53 m²/ha, biaix −0,16 → −0,12 m²/ha; increment d'AB R² 0,32 → 0,33. Per això el risc segons la mida s'aplica al pi negre i no al pi roig. La constant es recalibra perquè, a les parcel·les de calibratge, la pèrdua d'AB esperada sigui la mateixa taxa observada (0,42 % anual): el model canvia el repartiment entre mides, no el total. En un rodal amb més pins gruixuts que la mitjana de calibratge la pèrdua és més alta, i al revés. Els coeficients són al bloc `pertorbacions.mida` de `calibracio.json`.
+La validació creuada de les parcel·les de pi negre (307) millora una mica: AB final R² 0,934 → 0,935, RMSE 3,57 → 3,53 m²/ha, biaix −0,16 → −0,12 m²/ha; increment d'AB R² 0,32 → 0,33. Per això el risc segons la mida s'aplica al pi negre i no al pi roig. La constant es recalibra perquè, a les parcel·les de calibratge, la pèrdua d'AB esperada sigui la mateixa taxa observada (0,42 % anual): el model canvia el repartiment entre mides, no el total. En un rodal amb més pins gruixuts que la mitjana de calibratge la pèrdua és més alta, i al revés. Els coeficients són al bloc `pertorbacions.mida` de `calibracio.json`.
 
 L'episodi puntual es manté igual per a totes les mides: la severitat és la fracció d'AB que tria l'usuari, i dins de les parcel·les afectades l'efecte de la mida és petit.
 
 ### Autoaclarida
 
-L'índex de densitat de Reineke, $SDI = N\,(D_q/25)^{1,605}$, no pot superar el percentil 99 observat a les parcel·les de pineda d'Andorra i de Lleida (a Lleida, l'estat inicial de cada remesura). Si el creixement el faria superar, moren els pins més prims fins a tornar-hi. Un rodal que ja parteix per sobre del màxim manté la seva densitat inicial com a límit.
+L'índex de densitat de Reineke, $SDI = N\,(D_q/25)^{1,605}$, no pot superar el percentil 99 observat a les parcel·les de pi d'Andorra i de Lleida (a Lleida, l'estat inicial de cada remesura). Si el creixement el faria superar, moren els pins més prims fins a tornar-hi. Un rodal que ja parteix per sobre del màxim manté la seva densitat inicial com a límit.
 
 ### Aclarides
 
@@ -115,9 +115,9 @@ L'aclarida treu la fracció indicada de l'àrea basimètrica de pins: per baix (
 
 ### Validació
 
-- **Validació creuada per parcel·les** a Lleida (parcel·les de pineda): amb la mortalitat de fons i la pèrdua mitjana per pertorbacions, l'àrea basimètrica predita a la remesura (11–15 anys) té R² = 0,92–0,93 i un biaix d'entre −0,07 i −0,16 m²/ha. Només amb la mortalitat de fons, el biaix és de +0,9 a +1,1 m²/ha (el model no hi posa les pertorbacions). A les parcel·les que van perdre menys de 2 m²/ha per pertorbacions (394 de 444 de pi roig i 247 de 307 de pi negre), la mortalitat de fons sola dona R² = 0,94–0,96 i un biaix de +0,3 a +0,4 m²/ha. El nombre de morts de fons predit coincideix amb l'observat.
-- **Estoc a Andorra**: el carboni aeri mitjà de cada hàbitat de pineda queda a menys d'un 3 % del publicat a l'informe de l'INF1-AND (taula 26, per hàbitat).
-- **Embornal**: l'informe de l'INF1-AND estima el creixement amb les equacions IAVC de l'IFN2, que no tenen en compte la competència. A les parcel·les de Lleida amb més de 40 m²/ha aquestes equacions sobreestimen el creixement observat en volum entre 1,9 i 2,4 vegades, mentre que aquest model s'hi ajusta amb un error de menys del ±8 % en totes les classes de densitat. Per això l'embornal que dona l'app per a les pinedes denses d'Andorra és més baix que el de l'informe.
+- **Validació creuada per parcel·les** a Lleida (parcel·les de pi): amb la mortalitat de fons i la pèrdua mitjana per pertorbacions, l'àrea basimètrica predita a la remesura (11–15 anys) té R² = 0,92–0,93 i un biaix d'entre −0,07 i −0,16 m²/ha. Només amb la mortalitat de fons, el biaix és de +0,9 a +1,1 m²/ha (el model no hi posa les pertorbacions). A les parcel·les que van perdre menys de 2 m²/ha per pertorbacions (394 de 444 de pi roig i 247 de 307 de pi negre), la mortalitat de fons sola dona R² = 0,94–0,96 i un biaix de +0,3 a +0,4 m²/ha. El nombre de morts de fons predit coincideix amb l'observat.
+- **Estoc a Andorra**: el carboni aeri mitjà de cada hàbitat de pi queda a menys d'un 3 % del publicat a l'informe de l'INF1-AND (taula 26, per hàbitat).
+- **Embornal**: l'informe de l'INF1-AND estima el creixement amb les equacions IAVC de l'IFN2, que no tenen en compte la competència. A les parcel·les de Lleida amb més de 40 m²/ha aquestes equacions sobreestimen el creixement observat en volum entre 1,9 i 2,4 vegades, mentre que aquest model s'hi ajusta amb un error de menys del ±8 % en totes les classes de densitat. Per això l'embornal que dona l'app per als boscos de pi densos d'Andorra és més baix que el de l'informe.
 
 ### Limitacions
 
