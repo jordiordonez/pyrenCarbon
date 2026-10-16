@@ -13,11 +13,11 @@
 
 ### Creixement diametral
 
-Model lineal mixt (efecte aleatori de parcel·la) ajustat per espècie amb els pins vius de les parcel·les de l'IFN de les quatre comarques pirinenques de Lleida remesurades sense tallades. Les dues remesures (IFN2→IFN3 i IFN3→IFN4) s'ajusten juntes amb un terme de període:
+Model lineal mixt (efectes aleatoris niats de parcel·la i de parcel·la×període) ajustat per espècie amb els pins vius de les parcel·les de l'IFN de les quatre comarques pirinenques de Lleida remesurades sense tallades. Les dues remesures (IFN2→IFN3 i IFN3→IFN4) s'ajusten juntes amb un terme de període:
 
-$$\ln(\Delta D_{10} + 1) = \beta_0 + \beta_1 \ln D + \beta_2 D + \beta_3 \frac{BAL}{\ln(D+1)} + \beta_4 \ln AB + \beta_5\,\text{altitud} + \beta_6\,P$$
+$$\ln(\Delta D_{10} + 1) = \beta_0 + \beta_1 \ln D + \beta_2 D + \beta_3 \frac{BAL}{\ln(D+1)} + \beta_4 \ln AB + \beta_5\,\text{altitud} + \beta_6\,P + u_p + v_{pt} + e$$
 
-on $\Delta D_{10}$ és el creixement diametral en 10 anys (cm), $D$ el diàmetre normal (cm), $BAL$ l'àrea basimètrica dels arbres més gruixuts (m²/ha) i $AB$ la de la parcel·la; $P$ val 1 a la remesura IFN3→IFN4 i 0 a la IFN2→IFN3. Les prediccions fan servir els efectes fixos del període més recent ($P = 1$) i una correcció de biaix de la retransformació logarítmica (estimador de raó). Entre les dues remesures, el creixement va baixar un 2,7 % (pi roig) i un 3,9 % (pi negre).
+on $\Delta D_{10}$ és el creixement diametral en 10 anys (cm), $D$ el diàmetre normal (cm), $BAL$ l'àrea basimètrica dels arbres més gruixuts (m²/ha) i $AB$ la de la parcel·la; $P$ val 1 a la remesura IFN3→IFN4 i 0 a la IFN2→IFN3. $u_p$ és la constant aleatòria de la parcel·la, comuna a les dues remesures (qualitat de lloc), i $v_{pt}$ la de la parcel·la en un període concret: recull que una parcel·la no creix igual a les dues remesures per raons pròpies (clima local, danys, gestió). Sense $v_{pt}$, les observacions dels dos períodes d'una parcel·la es tractarien com si fossin més independents del que són i l'error estàndard de $\beta_6$ quedaria subestimat; el model niat s'ajusta clarament millor (raó de versemblances de 105 per al pi roig i 49 per al pi negre). Les desviacions típiques (REML) són $\sigma_u$ = 0,25 i $\sigma_v$ = 0,11 (pi roig) i 0,16 i 0,13 (pi negre). Les prediccions fan servir els efectes fixos del període més recent ($P = 1$, $u = v = 0$) i una correcció de biaix de la retransformació logarítmica (estimador de raó). Entre les dues remesures, el creixement va baixar un 4,1 % (pi roig, p = 0,01) i un 3,6 % (pi negre, p = 0,09).
 
 ### Mortalitat de fons
 
@@ -72,7 +72,7 @@ L'aclarida treu la fracció indicada de l'àrea basimètrica de pins: per baix (
 
 ### Validació
 
-- **Validació creuada per parcel·les** a Lleida (parcel·les de pineda): amb la mortalitat de fons i la pèrdua mitjana per pertorbacions, l'àrea basimètrica predita a la remesura (11–15 anys) té R² = 0,92–0,93 i un biaix d'entre −0,06 i −0,15 m²/ha. Només amb la mortalitat de fons, el biaix és de +0,9 a +1,1 m²/ha (el model no hi posa les pertorbacions). A les parcel·les que van perdre menys de 2 m²/ha per pertorbacions (394 de 444 de pi roig i 247 de 307 de pi negre), la mortalitat de fons sola dona R² = 0,94–0,96 i un biaix de +0,3 a +0,4 m²/ha. El nombre de morts de fons predit coincideix amb l'observat.
+- **Validació creuada per parcel·les** a Lleida (parcel·les de pineda): amb la mortalitat de fons i la pèrdua mitjana per pertorbacions, l'àrea basimètrica predita a la remesura (11–15 anys) té R² = 0,92–0,93 i un biaix d'entre −0,07 i −0,16 m²/ha. Només amb la mortalitat de fons, el biaix és de +0,9 a +1,1 m²/ha (el model no hi posa les pertorbacions). A les parcel·les que van perdre menys de 2 m²/ha per pertorbacions (394 de 444 de pi roig i 247 de 307 de pi negre), la mortalitat de fons sola dona R² = 0,94–0,96 i un biaix de +0,3 a +0,4 m²/ha. El nombre de morts de fons predit coincideix amb l'observat.
 - **Estoc a Andorra**: el carboni aeri mitjà de cada hàbitat de pineda queda a menys d'un 3 % del publicat a l'informe de l'INF1-AND (taula 26, per hàbitat).
 - **Embornal**: l'informe de l'INF1-AND estima el creixement amb les equacions IAVC de l'IFN2, que no tenen en compte la competència. A les parcel·les de Lleida amb més de 40 m²/ha aquestes equacions sobreestimen el creixement observat en volum entre 1,9 i 2,4 vegades, mentre que aquest model s'hi ajusta amb un error de menys del ±8 % en totes les classes de densitat. Per això l'embornal que dona l'app per a les pinedes denses d'Andorra és més baix que el de l'informe.
 

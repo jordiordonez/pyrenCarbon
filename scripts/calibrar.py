@@ -14,6 +14,14 @@ coeficients de calibracio.json porten l'efecte de p34 sumat a la constant, de ma
 necessita saber el període. El coeficient de p34, el seu error estàndard i el període de referència es
 desen a part («periode»), i els coeficients originals a «ajust».
 
+Efectes aleatoris del creixement. El model de creixement té dues constants aleatòries niades: una de parcel·la
+(u_p, comuna als dos períodes: qualitat de lloc) i una de parcel·la×període (v_pt: el que una parcel·la creix de
+més o de menys en un període concret per raons pròpies, com el clima local, danys o gestió). El període continua
+sent un efecte fix (p34). Les prediccions per a Andorra fan servir u = v = 0. Per a una parcel·la nova en un
+període nou, la variància entre parcel·les és σu² + σv². La prova de raó de versemblances contra el model amb
+només u_p es fa amb els dos models ajustats per màxima versemblança (ML); els coeficients i les variàncies que es
+desen són els de l'ajust REML del model niat.
+
 Mortalitat de fons i pertorbacions. L'IFN anota l'agent causant de cada arbre mort (scripts/preparar_ifn.py,
 CAUSES). El model de mortalitat s'ajusta només amb les morts de fons (competència, causa desconeguda o sense
 agent). Els arbres morts per una pertorbació (foc, sequera, neu i vent, causes biòtiques, altres) es treuen de
@@ -34,6 +42,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from scipy import stats
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import GroupKFold
 
@@ -60,6 +69,8 @@ CODIS = {"Pinus sylvestris": "Ps", "Pinus uncinata": "Pu"}
 PERIODES = ["IFN2-IFN3", "IFN3-IFN4"]
 FORMULA_CREIXEMENT_PERIODE = f"{FORMULA_CREIXEMENT} + {TERME_PERIODE}"
 FORMULA_MORTALITAT_PERIODE = f"{FORMULA_MORTALITAT} + {TERME_PERIODE}"
+# Constant aleatòria de parcel·la×període, niada dins la de parcel·la (un nivell per període).
+VC_PERIODE = {"periode": "0 + C(periode)"}
 # Equacions de l'informe de carboni de l'INF1-AND (taules 8 i 9): IFN3-Lleida i IFN2-Lleida.
 VOLUM_INFORME = {"Pinus sylvestris": (30.83, 0.000321), "Pinus uncinata": (77.94, 0.0002743)}
 IAVC_INFORME = {"Pinus sylvestris": (3.9, 0.0162104, -0.0000019), "Pinus uncinata": (3.32, 0.0105025, -0.0000019)}
@@ -72,14 +83,45 @@ LLINDAR_VALIDACIO = 2.0
 CLAU_PARCELA = ["periode", "parcela", "especie"]
 
 
+def model_creixement(dades: pd.DataFrame, niat: bool = True):
+    """Model mixt de creixement amb terme de període. niat: constant aleatòria de parcel·la (u_p) i de
+    parcel·la×període (v_pt); si no, només u_p (model anterior, per a la prova de raó de versemblances)."""
+    aleatoris = {"re_formula": "1", "vc_formula": VC_PERIODE} if niat else {}
+    return smf.mixedlm(FORMULA_CREIXEMENT_PERIODE, dades, groups=dades["parcela"], **aleatoris)
+
+
 def ajustar_creixement(dades: pd.DataFrame):
-    """Model mixt (REML, constant aleatòria per parcel·la) amb terme de període. Retorna el model, els efectes
-    fixos i la correcció de biaix de la retransformació logarítmica (estimador de raó de Snowdon)."""
-    model = smf.mixedlm(FORMULA_CREIXEMENT_PERIODE, dades, groups=dades["parcela"]).fit(reml=True)
+    """Model mixt niat (REML) amb terme de període. Retorna el model, els efectes fixos i la correcció de biaix de
+    la retransformació logarítmica (estimador de raó de Snowdon, amb les prediccions dels efectes fixos)."""
+    model = model_creixement(dades).fit(reml=True)
     fixos = {k: float(v) for k, v in model.fe_params.items()}
     pred_log = model.model.exog @ model.fe_params.to_numpy()
     correccio = float((dades["dd10"] + 1).mean() / np.exp(pred_log).mean())
     return model, fixos, correccio
+
+
+def variancies_creixement(model) -> dict:
+    """Components de variància (REML) del model niat i informació de convergència."""
+    var_u, var_v = float(model.cov_re.iloc[0, 0]), float(model.vcomp[0])
+    return {"sigma_u": float(np.sqrt(var_u)), "sigma_v": float(np.sqrt(var_v)), "sigma_e": float(np.sqrt(model.scale)),
+            "var_u": var_u, "var_v": var_v, "var_e": float(model.scale),
+            # Parcel·la nova en un període nou: u_p i v_pt sense informació.
+            "sigma_entre_parceles": float(np.sqrt(var_u + var_v)),
+            "convergit": bool(model.converged), "frontera_v": bool(var_v < 1e-8),
+            "logvers_reml": float(model.llf)}
+
+
+def prova_efecte_niat(dades: pd.DataFrame) -> dict:
+    """Prova de raó de versemblances (ML) del model niat (u_p + v_pt) contra el de només u_p. La variància de v_pt
+    és 0 sota la hipòtesi nul·la (a la frontera): el p de referència és el de la barreja 50:50 de χ²(0) i χ²(1),
+    que és la meitat del de la χ²(1)."""
+    niat, simple = model_creixement(dades).fit(reml=False), model_creixement(dades, niat=False).fit(reml=False)
+    lr = float(2.0 * (niat.llf - simple.llf))
+    p_chi2 = float(stats.chi2.sf(lr, 1))
+    return {"metode": "ML", "logvers_niat": float(niat.llf), "logvers_parcela": float(simple.llf),
+            "aic_niat": float(niat.aic), "aic_parcela": float(simple.aic), "lr": lr, "gl": 1,
+            "p_chi2_1": p_chi2, "p_frontera": 0.5 * p_chi2,
+            "convergit": {"niat": bool(niat.converged), "parcela": bool(simple.converged)}}
 
 
 def ajustar_mortalitat(dades: pd.DataFrame):
@@ -205,7 +247,8 @@ def metriques(observat: np.ndarray, predit: np.ndarray) -> dict:
 
 def validar_especie(dades: pd.DataFrame) -> pd.DataFrame:
     """Validació creuada per parcel·les: cada parcel·la (amb els seus dos períodes, si en té) es prediu amb
-    models que no l'han vist. Les prediccions fan servir el coeficient del període de cada arbre. La mortalitat
+    models que no l'han vist (model niat; la parcel·la de prova té u = v = 0). Les prediccions fan servir el
+    coeficient del període de cada arbre. La mortalitat
     de fons i la taxa de pèrdua per pertorbacions també s'estimen sense la parcel·la."""
     pred_creix = pd.Series(np.nan, index=dades.index)
     pred_mort = pd.Series(np.nan, index=dades.index)
@@ -395,8 +438,8 @@ def main() -> None:
             },
             "ajust": {
                 "creixement": resum_ajust(model_c.fe_params, model_c.bse_fe, model_c.pvalues[model_c.fe_params.index])
-                | {"sigma_u": float(np.sqrt(model_c.cov_re.iloc[0, 0])), "sigma_e": float(np.sqrt(model_c.scale)),
-                   "convergit": bool(model_c.converged)},
+                | {"efectes_aleatoris": "u_p (parcel·la) + v_pt (parcel·la×període), REML",
+                   **variancies_creixement(model_c), "prova_lr_parcela_periode": prova_efecte_niat(vius(dades))},
                 "mortalitat": resum_ajust(model_m.params, model_m.bse, model_m.pvalues)
                 | {"convergit": bool(model_m.converged)},
             },
@@ -420,6 +463,9 @@ def main() -> None:
         print("  pertorbacions:",
               json.dumps(sortida["especies"][especie]["pertorbacions"]["causes"], ensure_ascii=False))
         print("  període:", json.dumps(sortida["especies"][especie]["periode"], ensure_ascii=False))
+        print("  efectes aleatoris:", json.dumps(sortida["especies"][especie]["ajust"]["creixement"]["sigma_u"]),
+              json.dumps(sortida["especies"][especie]["ajust"]["creixement"]["sigma_v"]),
+              json.dumps(sortida["especies"][especie]["ajust"]["creixement"]["prova_lr_parcela_periode"]["lr"]))
 
     (DATA / "calibracio.json").write_text(json.dumps(sortida, indent=2, ensure_ascii=False), encoding="utf-8")
     pd.concat(validacions_arbres).round(4).to_csv(DATA / "validacio_arbres.csv", index=False)

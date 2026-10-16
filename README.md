@@ -30,7 +30,7 @@ pytest
 
 `DIR_IFN` ha de contenir, descomprimits, els fitxers de parcel·les de l'IFN2 de Lleida (`ifn2_25/PIESMA25.DBF`, `ifn2_25/DATEST25.DBF`), la base de dades de camp de l'IFN3 de Lleida (`ifn3p25/Ifn3p25.accdb`) i la de l'IFN4 de Catalunya (`ifn4_25/Ifn4_Cataluna.accdb`), descarregables del web del MITECO. `scripts/assignar_comarca.py` necessita a més la capa de comarques i municipis de les divisions administratives de l'ICGC (`icgc_divisions_administratives/`) i les dependències geogràfiques de `requirements-dev.txt` (shapely, pyshp, pyproj).
 
-El calibratge fa servir les dues remesures juntes amb un terme de període (`p34`); `data/calibracio.json` desa els coeficients del període més recent (IFN3→IFN4), que són els que fa servir l'app, i a part el coeficient del període i el seu error estàndard. `scripts/preparar_ifn.py` hi afegeix l'agent causant de cada pi mort i el grup de causa (constant `CAUSES`); `scripts/calibrar.py` ajusta la mortalitat només amb les morts de fons i desa les pertorbacions al bloc `pertorbacions`.
+El calibratge fa servir les dues remesures juntes amb un terme de període (`p34`); el model de creixement té efectes aleatoris niats de parcel·la i de parcel·la×període. `data/calibracio.json` desa els coeficients del període més recent (IFN3→IFN4), que són els que fa servir l'app, i a part el coeficient del període i el seu error estàndard, els components de variància i la prova de raó de versemblances de l'efecte parcel·la×període. `scripts/preparar_ifn.py` hi afegeix l'agent causant de cada pi mort i el grup de causa (constant `CAUSES`); `scripts/calibrar.py` ajusta la mortalitat només amb les morts de fons i desa les pertorbacions al bloc `pertorbacions`.
 
 ## Estructura
 
