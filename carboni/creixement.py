@@ -2,11 +2,16 @@
 
 Cada any:
 1. increment diametral de cada pi, en funció de la mida, la competència (BAL i AB) i l'altitud
-   (model lineal mixt calibrat amb les remesures IFN2–IFN3 de Lleida);
+   (model lineal mixt calibrat amb les remesures IFN2–IFN3 i IFN3–IFN4 de les comarques pirinenques de
+   Lleida, amb un terme de període);
 2. mortalitat individual, en funció de la mida i la competència (GLM binomial cloglog, mateixes dades);
 3. autoaclarida: si l'índex de densitat de Reineke supera el màxim observat, moren els pins més petits.
 
 Els arbres d'altres espècies compten per a la competència però no creixen ni moren.
+
+Els coeficients de data/calibracio.json corresponen al període de referència (IFN3–IFN4, el més recent):
+l'efecte del terme de període ja és a la constant, de manera que el simulador no necessita cap entrada de
+període.
 """
 
 from __future__ import annotations
@@ -30,6 +35,9 @@ from carboni.inventari import Rodal, factor_alcada_local
 
 FORMULA_CREIXEMENT = "y ~ lnd + dbh + bal_l + lnab + alt"
 FORMULA_MORTALITAT = "m ~ inv_d + dbh + bal"
+# Terme de període del calibratge (1 = IFN3–IFN4) i període que fan servir les prediccions.
+TERME_PERIODE = "p34"
+PERIODE_REFERENCIA = "IFN3-IFN4"
 EXPONENT_REINEKE = 1.605
 DQ_REFERENCIA_REINEKE = 25.0
 

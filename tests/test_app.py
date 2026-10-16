@@ -57,3 +57,15 @@ def test_inventari_csv_sense_fitxer_demana_fitxer():
     at.radio[0].set_value("Inventari propi (CSV)").run()
     assert not at.exception
     assert at.info
+
+
+def test_sliders_amb_pas_d_un():
+    at = iniciar()
+    pes, anys = at.slider[0], at.slider[1]
+    assert (pes.value, pes.step, anys.value, anys.step) == (30, 1, 20, 1)
+    pes.set_value(17).run()
+    assert not at.exception
+    at.slider[1].set_value(80).run()
+    assert not at.exception
+    assert "horitzó <strong>80 anys</strong>" in text_markdown(at)
+    assert "del 17 % de l'AB" in text_markdown(at)

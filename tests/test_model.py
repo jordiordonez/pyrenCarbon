@@ -51,9 +51,9 @@ def test_hi_ha_pinars_de_les_dues_especies(inf):
 
 
 def test_estoc_per_estrat_coherent_amb_informe_ari(inf, models):
-    """Carboni aeri mitjà per estrat dins del ±10 % de la taula 14 de l'informe de l'INF1-AND."""
+    """Carboni aeri mitjà per hàbitat dins del ±10 % de la taula 26 (per hàbitat) de l'informe de l'INF1-AND."""
     resum, arbres = inf
-    informe = {"PNM": 68.3, "PNX": 70.2, "PRM": 86.8, "PRX": 66.6}
+    informe = {"PNM": 66.6, "PNX": 70.9, "PRM": 86.0, "PRX": 68.1}
     seleccio = pinars(resum)
     for habitat, valor in informe.items():
         codis = seleccio.loc[seleccio["habitat"] == habitat, "parcela"]

@@ -134,7 +134,7 @@ def estoc_actual_pinars() -> pd.DataFrame:
     return seleccio
 
 
-@st.cache_data(show_spinner="Actualitzant resultats…")
+@st.cache_data(show_spinner="Actualitzant resultats…", max_entries=500)
 def simular_cache(arbres: pd.DataFrame, habitat: str, altitud: float, descripcio: str, anys: int):
     _, _, models, _, _ = carregar()
     return simular(Rodal(arbres, habitat, altitud, descripcio), models, anys)
@@ -243,11 +243,11 @@ with st.sidebar:
     amb_intervencio = st.toggle("Comparar amb una aclarida", value=True)
     tipus = st.selectbox("Tipus d'aclarida", list(TIPUS), format_func=lambda t: NOMS_TIPUS_CURTS[t].capitalize(),
                          disabled=not amb_intervencio, help="  \n".join(TIPUS.values()))
-    pes = st.slider("Àrea basimètrica extreta (%)", 5, 60, 30, step=5, disabled=not amb_intervencio)
+    pes = st.slider("Àrea basimètrica extreta (%)", 5, 60, 30, step=1, disabled=not amb_intervencio)
 
     st.divider()
     st.subheader("Horitzó")
-    anys = st.slider("Anys de projecció", 5, 80, 30, step=5, format="%d anys")
+    anys = st.slider("Anys de projecció", 5, 80, 20, step=1, format="%d anys")
 
 if rodal is None:
     if error:
@@ -468,10 +468,14 @@ with tabs[3]:
                        "text/csv", type="secondary", width="stretch")
 
 with tabs[4]:
+    pins_calibratge = sum(p["calibratge"]["arbres"] for p in calibracio["especies"].values())
     st.markdown(
-        '<div class="lectura-metode">Els models de creixement i mortalitat es van calibrar amb <strong>15 536 pins'
-        "</strong> remesurats entre l'IFN2 (1989–90) i l'IFN3 (2000–01) a Lleida, i s'han validat amb "
-        "<strong>validació creuada per parcel·les</strong>: cada parcel·la es prediu amb models ajustats sense ella."
+        '<div class="lectura-metode">Els models de creixement i mortalitat es van calibrar amb <strong>'
+        f"{pins_calibratge:,} registres de pins".replace(",", " ") + "</strong> remesurats a les comarques "
+        "pirinenques de Lleida (Pallars Sobirà, Alt Urgell, Alta Ribagorça i Cerdanya) entre l'IFN2 (1989–90) i "
+        "l'IFN3 (2000–01) i entre l'IFN3 i l'IFN4 (2014–16), amb un terme de període; les prediccions fan servir "
+        "el període més recent. S'han validat amb <strong>validació creuada per parcel·les</strong>: cada "
+        "parcel·la es prediu amb models ajustats sense ella."
         "</div>",
         unsafe_allow_html=True,
     )
@@ -482,14 +486,14 @@ with tabs[4]:
             "Espècie": especie,
             "Arbres": p["calibratge"]["arbres"],
             "Parcel·les": p["calibratge"]["parceles"],
-            "R² de l'AB a 11 anys": v["parceles"]["r2"],
+            "R² de l'AB final": v["parceles"]["r2"],
             "Biaix de l'AB (m²/ha)": v["parceles"]["biaix"],
             "R² de l'increment d'AB": v["increment_ab_parceles"]["r2"],
             "Morts predits": v["mortalitat"]["morts_predits"],
             "Morts observats": v["mortalitat"]["morts_observats"],
         })
     resum_validacio = pd.DataFrame(files).style.format(
-        {"Arbres": "{:,.0f}", "Parcel·les": "{:,.0f}", "R² de l'AB a 11 anys": "{:.2f}",
+        {"Arbres": "{:,.0f}", "Parcel·les": "{:,.0f}", "R² de l'AB final": "{:.2f}",
          "Biaix de l'AB (m²/ha)": "{:.2f}", "R² de l'increment d'AB": "{:.2f}", "Morts predits": "{:,.0f}",
          "Morts observats": "{:,.0f}"}, decimal=",", thousands=" ").hide(axis="index")
     st.dataframe(resum_validacio, hide_index=True, width="stretch")
@@ -504,9 +508,9 @@ with tabs[4]:
     maxim = validacio[["ab_2001_observada", "ab_2001_predita"]].max().max()
     fig.add_trace(go.Scatter(x=[0, maxim], y=[0, maxim], mode="lines", name="Predicció perfecta",
                              line=dict(color=GRIS_REFERENCIA, dash="dash")))
-    fig.update_xaxes(title="AB observada a l'IFN3 (m²/ha)")
+    fig.update_xaxes(title="AB observada a la remesura (m²/ha)")
     with st.container(border=True):
-        st.plotly_chart(estil(fig, "Àrea basimètrica predita i observada", "Parcel·les de pineda de Lleida, 2001",
+        st.plotly_chart(estil(fig, "Àrea basimètrica predita i observada", "Parcel·les de pineda del Pirineu de Lleida, IFN3 i IFN4",
                               "AB predita (m²/ha)"), width="stretch", config=CONFIG_GRAFIC)
 
     fig = go.Figure()
@@ -547,7 +551,7 @@ st.markdown(
     <div class="peu">
       pyrenCarbon · versió {VERSIO} · <a href="https://github.com/jordiordonez/pyrenCarbon">codi font</a> · Estimacions orientatives; vegeu les limitacions a <em>Com funciona</em>.<br>
       Dades: 1r Inventari Nacional Forestal d'Andorra, BD-INF1-AND (Andorra Recerca + Innovació i CTFC, CC BY-SA 4.0);
-      Segon i Tercer Inventari Forestal Nacional, província de Lleida (MITECO).
+      Segon, Tercer i Quart Inventari Forestal Nacional, província de Lleida (MITECO).
     </div>
     """,
     unsafe_allow_html=True,

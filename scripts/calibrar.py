@@ -6,7 +6,13 @@
 Llegeix data/ifn_lleida_arbres.csv (scripts/preparar_ifn.py) i data/inf1and/ (INF1-AND) i escriu:
     data/calibracio.json          coeficients, límits d'autoaclarida i mètriques de validació
     data/validacio_arbres.csv     creixement observat i predit (validació creuada) de cada arbre
-    data/validacio_parceles.csv   AB observada i predita el 2001 a cada parcel·la de pinar
+    data/validacio_parceles.csv   AB observada i predita a la mesura final de cada parcel·la de pinar i període
+
+Els models s'ajusten amb les dues remesures juntes (IFN2-IFN3 i IFN3-IFN4) i un terme de període, p34
+(1 = IFN3-IFN4). Per a les prediccions a Andorra es pren com a referència el període més recent: els
+coeficients de calibracio.json porten l'efecte de p34 sumat a la constant, de manera que el simulador no
+necessita saber el període. El coeficient de p34, el seu error estàndard i el període de referència es
+desen a part («periode»), i els coeficients originals a «ajust».
 """
 
 import json
@@ -27,6 +33,8 @@ from carboni.creixement import (  # noqa: E402
     EXPONENT_REINEKE,
     FORMULA_CREIXEMENT,
     FORMULA_MORTALITAT,
+    PERIODE_REFERENCIA,
+    TERME_PERIODE,
     ModelEspecie,
     sdi,
     variables_arbre,
@@ -37,33 +45,54 @@ from carboni.inventari import carregar_inf1and, resum_parceles  # noqa: E402
 PLECS = 5
 QUANTIL_SDI_MAX = 0.99
 CODIS = {"Pinus sylvestris": "Ps", "Pinus uncinata": "Pu"}
+PERIODES = ["IFN2-IFN3", "IFN3-IFN4"]
+FORMULA_CREIXEMENT_PERIODE = f"{FORMULA_CREIXEMENT} + {TERME_PERIODE}"
+FORMULA_MORTALITAT_PERIODE = f"{FORMULA_MORTALITAT} + {TERME_PERIODE}"
 # Equacions de l'informe de carboni de l'INF1-AND (taules 8 i 9): IFN3-Lleida i IFN2-Lleida.
 VOLUM_INFORME = {"Pinus sylvestris": (30.83, 0.000321), "Pinus uncinata": (77.94, 0.0002743)}
 IAVC_INFORME = {"Pinus sylvestris": (3.9, 0.0162104, -0.0000019), "Pinus uncinata": (3.32, 0.0105025, -0.0000019)}
 CLASSES_AB = [0, 20, 30, 40, 100]
 
 
-def ajustar_creixement(dades: pd.DataFrame) -> tuple[dict, float]:
-    model = smf.mixedlm(FORMULA_CREIXEMENT, dades, groups=dades["parcela"]).fit(reml=True)
+def ajustar_creixement(dades: pd.DataFrame):
+    """Model mixt (REML, constant aleatòria per parcel·la) amb terme de període. Retorna el model, els efectes
+    fixos i la correcció de biaix de la retransformació logarítmica (estimador de raó de Snowdon)."""
+    model = smf.mixedlm(FORMULA_CREIXEMENT_PERIODE, dades, groups=dades["parcela"]).fit(reml=True)
     fixos = {k: float(v) for k, v in model.fe_params.items()}
-    # Correcció de biaix de la retransformació logarítmica (estimador de raó de Snowdon).
     pred_log = model.model.exog @ model.fe_params.to_numpy()
     correccio = float((dades["dd10"] + 1).mean() / np.exp(pred_log).mean())
-    return fixos, correccio
+    return model, fixos, correccio
 
 
-def ajustar_mortalitat(dades: pd.DataFrame) -> dict:
+def ajustar_mortalitat(dades: pd.DataFrame):
     familia = sm.families.Binomial(link=sm.families.links.CLogLog())
-    model = smf.glm(FORMULA_MORTALITAT, dades, family=familia, offset=np.log(dades["anys"])).fit()
-    return {k: float(v) for k, v in model.params.items()}
+    return smf.glm(FORMULA_MORTALITAT_PERIODE, dades, family=familia, offset=np.log(dades["anys"])).fit()
+
+
+def plegar_periode(coeficients: dict) -> dict:
+    """Coeficients per al període de referència (IFN3-IFN4, p34 = 1): l'efecte del període passa a la constant."""
+    c = dict(coeficients)
+    c["Intercept"] += c.pop(TERME_PERIODE) * (1.0 if PERIODE_REFERENCIA == "IFN3-IFN4" else 0.0)
+    return c
+
+
+def resum_ajust(params: pd.Series, ee: pd.Series, p: pd.Series) -> dict:
+    return {"coeficients": {k: float(v) for k, v in params.items()},
+            "ee": {k: float(v) for k, v in ee.items()},
+            "p": {k: float(v) for k, v in p.items()}}
 
 
 def preparar(dades: pd.DataFrame) -> pd.DataFrame:
     dades = variables_arbre(dades)
+    dades[TERME_PERIODE] = (dades["periode"] == "IFN3-IFN4").astype(int)
     dades["dd10"] = dades["id_dbh"] * 10.0
     dades["y"] = np.log(dades["dd10"] + 1.0)
     dades["m"] = dades["mort"].astype(int)
     return dades
+
+
+def vius(dades: pd.DataFrame) -> pd.DataFrame:
+    return dades[~dades["mort"] & (dades["dd10"] > -1)]
 
 
 def metriques(observat: np.ndarray, predit: np.ndarray) -> dict:
@@ -78,47 +107,53 @@ def metriques(observat: np.ndarray, predit: np.ndarray) -> dict:
     }
 
 
-def validar_especie(dades: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Validació creuada per parcel·les: cada parcel·la es prediu amb models que no l'han vist."""
-    vius = dades[~dades["mort"] & (dades["dd10"] > -1)]
+def validar_especie(dades: pd.DataFrame) -> pd.DataFrame:
+    """Validació creuada per parcel·les: cada parcel·la (amb els seus dos períodes, si en té) es prediu amb
+    models que no l'han vist. Les prediccions fan servir el coeficient del període de cada arbre."""
     pred_creix = pd.Series(np.nan, index=dades.index)
     pred_mort = pd.Series(np.nan, index=dades.index)
     plecs = GroupKFold(n_splits=PLECS)
     for entrenament, prova in plecs.split(dades, groups=dades["parcela"]):
         entren = dades.iloc[entrenament]
         prova_df = dades.iloc[prova]
-        fixos, correccio = ajustar_creixement(entren[~entren["mort"] & (entren["dd10"] > -1)])
-        mortalitat = ajustar_mortalitat(entren)
+        _, fixos, correccio = ajustar_creixement(vius(entren))
+        mortalitat = {k: float(v) for k, v in ajustar_mortalitat(entren).params.items()}
         model = ModelEspecie(especie="", creixement=fixos, correccio_biaix=correccio, mortalitat=mortalitat,
                              sdi_max=np.inf)
         pred_creix.loc[prova_df.index] = model.increment_diametral(prova_df)
         p_anual = model.mortalitat_anual(prova_df)
         pred_mort.loc[prova_df.index] = 1.0 - (1.0 - p_anual) ** prova_df["anys"]
-    dades = dades.assign(id_predit=pred_creix, p_mort_periode=pred_mort)
+    return dades.assign(id_predit=pred_creix, p_mort_periode=pred_mort)
 
-    v = dades.loc[vius.index]
-    mort_obs = dades["m"].to_numpy()
-    mort_pred = dades["p_mort_periode"].to_numpy()
-    resultat = {
+
+def metriques_validacio(validat: pd.DataFrame, parceles: pd.DataFrame) -> dict:
+    v = vius(validat)
+    mort_obs = validat["m"].to_numpy()
+    mort_pred = validat["p_mort_periode"].to_numpy()
+    increment_obs = parceles["ab_2001_observada"] - parceles["ab_1990"]
+    increment_pred = parceles["ab_2001_predita"] - parceles["ab_1990"]
+    return {
         "creixement": metriques(v["id_dbh"].to_numpy(), v["id_predit"].to_numpy()),
         "mortalitat": {
-            "n": int(len(dades)),
+            "n": int(len(validat)),
             "auc": float(roc_auc_score(mort_obs, mort_pred)),
             "morts_observats": int(mort_obs.sum()),
             "morts_predits": float(mort_pred.sum()),
         },
+        "parceles": metriques(parceles["ab_2001_observada"].to_numpy(), parceles["ab_2001_predita"].to_numpy()),
+        "increment_ab_parceles": metriques(increment_obs.to_numpy(), increment_pred.to_numpy()),
     }
-    return dades, resultat
 
 
 def validar_parceles(dades: pd.DataFrame) -> pd.DataFrame:
-    """AB del 2001 dels pins presents el 1990: observada vs predita (creixement i mortalitat esperats)."""
+    """AB a la mesura final dels pins presents a la inicial: observada vs predita (creixement i mortalitat
+    esperats). Per compatibilitat, les columnes es diuen ab_1990 (mesura inicial) i ab_2001_* (final)."""
     d = dades.copy()
     d["g_1990"] = np.pi * (d["dbh"] / 200.0) ** 2 * d["f"]
     d["g_2001_obs"] = np.where(d["mort"], 0.0, np.pi * (d["dbh_ifn3"] / 200.0) ** 2 * d["f"])
     dbh_pred = d["dbh"] + d["id_predit"] * d["anys"]
     d["g_2001_pred"] = np.pi * (dbh_pred / 200.0) ** 2 * d["f"] * (1.0 - d["p_mort_periode"])
-    parceles = d.groupby(["parcela", "especie"]).agg(
+    parceles = d.groupby(["periode", "parcela", "especie"]).agg(
         ab_1990=("g_1990", "sum"),
         ab_2001_observada=("g_2001_obs", "sum"),
         ab_2001_predita=("g_2001_pred", "sum"),
@@ -156,10 +191,11 @@ def comparar_amb_informe(especie: str, validat: pd.DataFrame) -> list[dict]:
 
 
 def sdi_maxim(especie: str, lleida: pd.DataFrame, andorra: pd.DataFrame) -> dict:
-    codi = {"Pinus sylvestris": "Ps", "Pinus uncinata": "Pu"}[especie]
-    and_ = andorra[(andorra["especie_dominant"] == codi) & (andorra["fraccio_dominant"] >= 0.7)]
+    """Percentil 99 de l'SDI de les pinedes d'Andorra i de l'estat inicial de les parcel·les de Lleida (cada
+    parcel·la hi compta un cop per període: l'IFN2 i l'IFN3 són dos estats diferents del rodal)."""
+    and_ = andorra[(andorra["especie_dominant"] == CODIS[especie]) & (andorra["fraccio_dominant"] >= 0.7)]
     sdi_and = sdi(and_["n"], and_["dq"])
-    parc = lleida[lleida["especie"] == especie].groupby("parcela").agg(n=("n", "first"), ab=("ab", "first"))
+    parc = lleida[lleida["especie"] == especie].groupby(["periode", "parcela"]).agg(n=("n", "first"), ab=("ab", "first"))
     dq = np.sqrt(4 * parc["ab"] / (np.pi * parc["n"])) * 100
     sdi_lle = sdi(parc["n"], dq)
     sdi_and, sdi_lle = pd.Series(sdi_and), pd.Series(sdi_lle)
@@ -172,43 +208,82 @@ def sdi_maxim(especie: str, lleida: pd.DataFrame, andorra: pd.DataFrame) -> dict
     }
 
 
+def mostra(dades: pd.DataFrame) -> dict:
+    return {"arbres": int(len(dades)), "parceles": int(dades["parcela"].nunique()), "morts": int(dades["mort"].sum()),
+            "arbres_creixement": int(len(vius(dades))), "anys_min": int(dades["anys"].min()),
+            "anys_max": int(dades["anys"].max())}
+
+
 def main() -> None:
     lleida = preparar(pd.read_csv(DATA / "ifn_lleida_arbres.csv"))
     andorra = resum_parceles(*carregar_inf1and(DATA / "inf1and"))
+    comarques = sorted(lleida["comarca"].unique())
 
-    sortida = {"exponent_reineke": EXPONENT_REINEKE, "especies": {}}
+    sortida = {
+        "exponent_reineke": EXPONENT_REINEKE,
+        "dades_calibratge": {
+            "font": "IFN2, IFN3 i IFN4 de Lleida (MITECO), parcel·les remesurades sense tallades",
+            "comarques": comarques,
+            "periodes": PERIODES,
+            "terme_periode": TERME_PERIODE,
+            "periode_referencia": PERIODE_REFERENCIA,
+        },
+        "especies": {},
+    }
     validacions_arbres, validacions_parceles = [], []
     for especie, dades in lleida.groupby("especie"):
-        vius = dades[~dades["mort"] & (dades["dd10"] > -1)]
-        fixos, correccio = ajustar_creixement(vius)
-        mortalitat = ajustar_mortalitat(dades)
-        validat, metr = validar_especie(dades)
+        model_c, fixos, correccio = ajustar_creixement(vius(dades))
+        model_m = ajustar_mortalitat(dades)
+        validat = validar_especie(dades)
         parceles = validar_parceles(validat)
-        metr["parceles"] = metriques(parceles["ab_2001_observada"].to_numpy(), parceles["ab_2001_predita"].to_numpy())
+        metr = metriques_validacio(validat, parceles)
         metr["comparacio_informe"] = comparar_amb_informe(especie, validat)
-        increment_obs = parceles["ab_2001_observada"] - parceles["ab_1990"]
-        increment_pred = parceles["ab_2001_predita"] - parceles["ab_1990"]
-        metr["increment_ab_parceles"] = metriques(increment_obs.to_numpy(), increment_pred.to_numpy())
+        metr["per_periode"] = {
+            periode: metriques_validacio(validat[validat["periode"] == periode], parceles[parceles["periode"] == periode])
+            | {"comparacio_informe": comparar_amb_informe(especie, validat[validat["periode"] == periode])}
+            for periode in PERIODES
+        }
+        ee_c, ee_m = model_c.bse_fe[TERME_PERIODE], model_m.bse[TERME_PERIODE]
         sortida["especies"][especie] = {
-            "creixement": fixos,
+            "creixement": plegar_periode(fixos),
             "correccio_biaix": correccio,
-            "mortalitat": mortalitat,
+            "mortalitat": plegar_periode({k: float(v) for k, v in model_m.params.items()}),
             **sdi_maxim(especie, lleida, andorra),
+            "periode": {
+                "terme": TERME_PERIODE,
+                "codificacio": "p34 = 1 a IFN3-IFN4, 0 a IFN2-IFN3",
+                "referencia": PERIODE_REFERENCIA,
+                "creixement": {"coef": fixos[TERME_PERIODE], "ee": float(ee_c),
+                               "p": float(model_c.pvalues[TERME_PERIODE]),
+                               "efecte_relatiu": float(np.exp(fixos[TERME_PERIODE]) - 1.0)},
+                "mortalitat": {"coef": float(model_m.params[TERME_PERIODE]), "ee": float(ee_m),
+                               "p": float(model_m.pvalues[TERME_PERIODE]),
+                               "rao_de_riscos": float(np.exp(model_m.params[TERME_PERIODE]))},
+            },
+            "ajust": {
+                "creixement": resum_ajust(model_c.fe_params, model_c.bse_fe, model_c.pvalues[model_c.fe_params.index])
+                | {"sigma_u": float(np.sqrt(model_c.cov_re.iloc[0, 0])), "sigma_e": float(np.sqrt(model_c.scale)),
+                   "convergit": bool(model_c.converged)},
+                "mortalitat": resum_ajust(model_m.params, model_m.bse, model_m.pvalues)
+                | {"convergit": bool(model_m.converged)},
+            },
             "calibratge": {
-                "arbres": int(len(dades)),
-                "parceles": int(dades["parcela"].nunique()),
-                "morts": int(dades["mort"].sum()),
+                **mostra(dades),
                 "altitud_min": float(dades["altitud"].min()),
                 "altitud_max": float(dades["altitud"].max()),
                 "ab_max": float(dades["ab"].max()),
+                "parceles_dos_periodes": int(dades.groupby("parcela")["periode"].nunique().eq(2).sum()),
+                "comarques": comarques,
+                "per_periode": {p: mostra(d) for p, d in dades.groupby("periode")},
             },
             "validacio": metr,
         }
-        validacions_arbres.append(
-            validat.loc[~validat["mort"], ["especie", "parcela", "dbh", "bal", "ab", "altitud", "id_dbh", "id_predit"]]
-        )
+        validacions_arbres.append(validat.loc[~validat["mort"], ["periode", "especie", "parcela", "dbh", "bal", "ab",
+                                                                 "altitud", "id_dbh", "id_predit"]])
         validacions_parceles.append(parceles)
-        print(especie, json.dumps(metr, indent=1, ensure_ascii=False))
+        print(especie, json.dumps({k: metr[k] for k in ("creixement", "mortalitat", "parceles")}, indent=1,
+                                  ensure_ascii=False))
+        print("  període:", json.dumps(sortida["especies"][especie]["periode"], ensure_ascii=False))
 
     (DATA / "calibracio.json").write_text(json.dumps(sortida, indent=2, ensure_ascii=False), encoding="utf-8")
     pd.concat(validacions_arbres).round(4).to_csv(DATA / "validacio_arbres.csv", index=False)

@@ -1,179 +1,640 @@
 {
   "exponent_reineke": 1.605,
+  "dades_calibratge": {
+    "font": "IFN2, IFN3 i IFN4 de Lleida (MITECO), parcel·les remesurades sense tallades",
+    "comarques": [
+      "Alt Urgell",
+      "Alta Ribagorça",
+      "Cerdanya",
+      "Pallars Sobirà"
+    ],
+    "periodes": [
+      "IFN2-IFN3",
+      "IFN3-IFN4"
+    ],
+    "terme_periode": "p34",
+    "periode_referencia": "IFN3-IFN4"
+  },
   "especies": {
     "Pinus sylvestris": {
       "creixement": {
-        "Intercept": 1.2236957499108152,
-        "lnd": 0.14813766150894775,
-        "dbh": -0.01730418261630149,
-        "bal_l": -0.045197259647678505,
-        "lnab": -0.1407579893369798,
-        "alt": 0.4009770788411367
+        "Intercept": 1.3112176858691935,
+        "lnd": 0.11061027073274751,
+        "dbh": -0.018070885991552522,
+        "bal_l": -0.0489870192896904,
+        "lnab": -0.15110639111586993,
+        "alt": 0.44033745586042633
       },
-      "correccio_biaix": 1.0930627796017993,
+      "correccio_biaix": 1.0901185514390561,
       "mortalitat": {
-        "Intercept": -6.70134931881076,
-        "inv_d": 8.183591049252259,
-        "dbh": 0.01725833753796972,
-        "bal": 0.03752056957468699
+        "Intercept": -6.541967255144522,
+        "inv_d": 11.68381080391508,
+        "dbh": 0.018129753494002282,
+        "bal": 0.028924180069194904
       },
-      "sdi_max": 1162.2579555714171,
+      "sdi_max": 1186.6604340033948,
       "sdi_p50_andorra": 854.2032134727576,
-      "sdi_p50_lleida": 371.04599395925953,
-      "n_parceles": 809,
+      "sdi_p50_lleida": 419.83642668457946,
+      "n_parceles": 810,
+      "periode": {
+        "terme": "p34",
+        "codificacio": "p34 = 1 a IFN3-IFN4, 0 a IFN2-IFN3",
+        "referencia": "IFN3-IFN4",
+        "creixement": {
+          "coef": -0.027823108034167824,
+          "ee": 0.011392416944101555,
+          "p": 0.014596113995201093,
+          "efecte_relatiu": -0.02743961029471098
+        },
+        "mortalitat": {
+          "coef": 0.09851939613612051,
+          "ee": 0.07176178703727358,
+          "p": 0.16979366751533098,
+          "rao_de_riscos": 1.103535808517568
+        }
+      },
+      "ajust": {
+        "creixement": {
+          "coeficients": {
+            "Intercept": 1.3390407939033613,
+            "lnd": 0.11061027073274751,
+            "dbh": -0.018070885991552522,
+            "bal_l": -0.0489870192896904,
+            "lnab": -0.15110639111586993,
+            "alt": 0.44033745586042633,
+            "p34": -0.027823108034167824
+          },
+          "ee": {
+            "Intercept": 0.11731280275793034,
+            "lnd": 0.04229607679386102,
+            "dbh": 0.0015639734613634418,
+            "bal_l": 0.0022497038176517285,
+            "lnab": 0.018586069218541865,
+            "alt": 0.047205796341477965,
+            "p34": 0.011392416944101555
+          },
+          "p": {
+            "Intercept": 3.5484344668763224e-30,
+            "lnd": 0.008919021900311332,
+            "dbh": 7.0077672751112925e-31,
+            "bal_l": 4.01564978351964e-105,
+            "lnab": 4.2897646225580985e-16,
+            "alt": 1.0784888301381681e-20,
+            "p34": 0.014596113995201093
+          },
+          "sigma_u": 0.27106501349425344,
+          "sigma_e": 0.3964352447627845,
+          "convergit": true
+        },
+        "mortalitat": {
+          "coeficients": {
+            "Intercept": -6.640486651280643,
+            "inv_d": 11.68381080391508,
+            "dbh": 0.018129753494002282,
+            "bal": 0.028924180069194904,
+            "p34": 0.09851939613612051
+          },
+          "ee": {
+            "Intercept": 0.2947986803325654,
+            "inv_d": 2.713393415970311,
+            "dbh": 0.006645210446906905,
+            "bal": 0.0032420987099930952,
+            "p34": 0.07176178703727358
+          },
+          "p": {
+            "Intercept": 2.335282810212402e-112,
+            "inv_d": 1.6625000914773473e-05,
+            "dbh": 0.0063672550029491804,
+            "bal": 4.602757118168566e-19,
+            "p34": 0.16979366751533098
+          },
+          "convergit": true
+        }
+      },
       "calibratge": {
-        "arbres": 9785,
-        "parceles": 739,
-        "morts": 521,
+        "arbres": 11546,
+        "parceles": 567,
+        "morts": 823,
+        "arbres_creixement": 10711,
+        "anys_min": 11,
+        "anys_max": 15,
         "altitud_min": 400.0,
         "altitud_max": 2200.0,
-        "ab_max": 56.6952
+        "ab_max": 73.1193,
+        "parceles_dos_periodes": 173,
+        "comarques": [
+          "Alt Urgell",
+          "Alta Ribagorça",
+          "Cerdanya",
+          "Pallars Sobirà"
+        ],
+        "per_periode": {
+          "IFN2-IFN3": {
+            "arbres": 6980,
+            "parceles": 482,
+            "morts": 432,
+            "arbres_creixement": 6540,
+            "anys_min": 11,
+            "anys_max": 12
+          },
+          "IFN3-IFN4": {
+            "arbres": 4566,
+            "parceles": 258,
+            "morts": 391,
+            "arbres_creixement": 4171,
+            "anys_min": 13,
+            "anys_max": 15
+          }
+        }
       },
       "validacio": {
         "creixement": {
-          "n": 9255,
-          "biaix": -3.790680069175953e-05,
-          "rmse": 0.16406818749040852,
-          "r2": 0.1789597341766208,
-          "mitjana_observada": 0.27220075634792
+          "n": 10711,
+          "biaix": -4.772911626025963e-05,
+          "rmse": 0.1563083788420867,
+          "r2": 0.16815875793964352,
+          "mitjana_observada": 0.2522143684063113
         },
         "mortalitat": {
-          "n": 9785,
-          "auc": 0.6083458474635267,
-          "morts_observats": 521,
-          "morts_predits": 520.2386945025958
+          "n": 11546,
+          "auc": 0.5954417826842269,
+          "morts_observats": 823,
+          "morts_predits": 823.486559488003
         },
         "parceles": {
-          "n": 404,
-          "biaix": -0.2203561881188119,
-          "rmse": 2.999179955161176,
-          "r2": 0.9402276312519048,
-          "mitjana_observada": 20.940067574257426
+          "n": 444,
+          "biaix": -0.10869391891891904,
+          "rmse": 3.9376376143233687,
+          "r2": 0.9145642682730688,
+          "mitjana_observada": 23.25852882882883
+        },
+        "increment_ab_parceles": {
+          "n": 444,
+          "biaix": -0.10869391891891904,
+          "rmse": 3.9376376143233687,
+          "r2": 0.16655075063530433,
+          "mitjana_observada": 4.066711261261261
         },
         "comparacio_informe": [
           {
             "ab_min": 0.0,
             "ab_max": 20.0,
-            "arbres": 3832,
-            "model_sobre_observat": 0.9483408394293044,
-            "informe_sobre_observat": 1.0084445630385206
+            "arbres": 3258,
+            "model_sobre_observat": 0.9958459108548375,
+            "informe_sobre_observat": 0.9843391005439992
           },
           {
             "ab_min": 20.0,
             "ab_max": 30.0,
-            "arbres": 3040,
-            "model_sobre_observat": 0.947080087899421,
-            "informe_sobre_observat": 1.3010370527345045
+            "arbres": 3634,
+            "model_sobre_observat": 0.9393570704112969,
+            "informe_sobre_observat": 1.2971443063033075
           },
           {
             "ab_min": 30.0,
             "ab_max": 40.0,
-            "arbres": 1531,
-            "model_sobre_observat": 0.9795918866884628,
-            "informe_sobre_observat": 1.5996280970376735
+            "arbres": 2263,
+            "model_sobre_observat": 0.9574214892244881,
+            "informe_sobre_observat": 1.544546113642953
           },
           {
             "ab_min": 40.0,
             "ab_max": 100.0,
-            "arbres": 861,
-            "model_sobre_observat": 1.0800178198553894,
-            "informe_sobre_observat": 2.0374756977243824
+            "arbres": 1568,
+            "model_sobre_observat": 0.9257307359033504,
+            "informe_sobre_observat": 1.8747036584086434
           }
         ],
-        "increment_ab_parceles": {
-          "n": 404,
-          "biaix": -0.2203561881188119,
-          "rmse": 2.999179955161176,
-          "r2": 0.35664730925001575,
-          "mitjana_observada": 4.502807920792079
+        "per_periode": {
+          "IFN2-IFN3": {
+            "creixement": {
+              "n": 6540,
+              "biaix": -0.0006431311599738666,
+              "rmse": 0.16564941748209963,
+              "r2": 0.16889194497844195,
+              "mitjana_observada": 0.2707085932721713
+            },
+            "mortalitat": {
+              "n": 6980,
+              "auc": 0.595745237448811,
+              "morts_observats": 432,
+              "morts_predits": 432.9207350204265
+            },
+            "parceles": {
+              "n": 299,
+              "biaix": -0.10701571906354523,
+              "rmse": 2.925730959056661,
+              "r2": 0.9444320458031852,
+              "mitjana_observada": 21.24072508361204
+            },
+            "increment_ab_parceles": {
+              "n": 299,
+              "biaix": -0.10701571906354522,
+              "rmse": 2.925730959056661,
+              "r2": 0.2766745623248885,
+              "mitjana_observada": 4.14299397993311
+            },
+            "comparacio_informe": [
+              {
+                "ab_min": 0.0,
+                "ab_max": 20.0,
+                "arbres": 2484,
+                "model_sobre_observat": 0.9848304607069678,
+                "informe_sobre_observat": 0.9651347274849975
+              },
+              {
+                "ab_min": 20.0,
+                "ab_max": 30.0,
+                "arbres": 2172,
+                "model_sobre_observat": 0.9108579910536483,
+                "informe_sobre_observat": 1.2359227448381211
+              },
+              {
+                "ab_min": 30.0,
+                "ab_max": 40.0,
+                "arbres": 1235,
+                "model_sobre_observat": 0.9550282843689039,
+                "informe_sobre_observat": 1.54214984750566
+              },
+              {
+                "ab_min": 40.0,
+                "ab_max": 100.0,
+                "arbres": 657,
+                "model_sobre_observat": 1.0604753593269565,
+                "informe_sobre_observat": 2.061413382012285
+              }
+            ]
+          },
+          "IFN3-IFN4": {
+            "creixement": {
+              "n": 4171,
+              "biaix": 0.000885843016534507,
+              "rmse": 0.140416404631538,
+              "r2": 0.11503537657464857,
+              "mitjana_observada": 0.22321599136897627
+            },
+            "mortalitat": {
+              "n": 4566,
+              "auc": 0.5699379757109821,
+              "morts_observats": 391,
+              "morts_predits": 390.56582446757636
+            },
+            "parceles": {
+              "n": 145,
+              "biaix": -0.11215448275862068,
+              "rmse": 5.4613405958736845,
+              "r2": 0.8595426267131959,
+              "mitjana_observada": 27.419379310344826
+            },
+            "increment_ab_parceles": {
+              "n": 145,
+              "biaix": -0.11215448275862068,
+              "rmse": 5.4613405958736845,
+              "r2": 0.0829871096576914,
+              "mitjana_observada": 3.909411034482758
+            },
+            "comparacio_informe": [
+              {
+                "ab_min": 0.0,
+                "ab_max": 20.0,
+                "arbres": 774,
+                "model_sobre_observat": 1.0378518168831807,
+                "informe_sobre_observat": 1.0575723392424343
+              },
+              {
+                "ab_min": 20.0,
+                "ab_max": 30.0,
+                "arbres": 1462,
+                "model_sobre_observat": 0.9900631290690167,
+                "informe_sobre_observat": 1.4060707753942394
+              },
+              {
+                "ab_min": 30.0,
+                "ab_max": 40.0,
+                "arbres": 1028,
+                "model_sobre_observat": 0.9603921301019149,
+                "informe_sobre_observat": 1.5475205544326858
+              },
+              {
+                "ab_min": 40.0,
+                "ab_max": 100.0,
+                "arbres": 911,
+                "model_sobre_observat": 0.8437775996505503,
+                "informe_sobre_observat": 1.7611447866003958
+              }
+            ]
+          }
         }
       }
     },
     "Pinus uncinata": {
       "creixement": {
-        "Intercept": 2.2928490922332263,
-        "lnd": -0.15808662874161217,
-        "dbh": -0.005606301704557504,
-        "bal_l": -0.03574944790126192,
-        "lnab": -0.10890241154073992,
-        "alt": -0.06579046414487566
+        "Intercept": 1.9280445200050043,
+        "lnd": -0.1349691455178053,
+        "dbh": -0.007278394879621351,
+        "bal_l": -0.03804083252154555,
+        "lnab": -0.08533397049707954,
+        "alt": 0.061246831191191606
       },
-      "correccio_biaix": 1.1222631570102612,
+      "correccio_biaix": 1.118598073825272,
       "mortalitat": {
-        "Intercept": -6.643326826396409,
-        "inv_d": 8.781663780225344,
-        "dbh": 0.03368704506471423,
-        "bal": 0.020975089042717606
+        "Intercept": -6.636149071991425,
+        "inv_d": 5.97135958068611,
+        "dbh": 0.03247954801514659,
+        "bal": 0.02395856954263712
       },
       "sdi_max": 1318.7094482860116,
       "sdi_p50_andorra": 845.8387526301785,
-      "sdi_p50_lleida": 401.2401848516782,
-      "n_parceles": 453,
+      "sdi_p50_lleida": 452.57312128089114,
+      "n_parceles": 553,
+      "periode": {
+        "terme": "p34",
+        "codificacio": "p34 = 1 a IFN3-IFN4, 0 a IFN2-IFN3",
+        "referencia": "IFN3-IFN4",
+        "creixement": {
+          "coef": -0.03979587653186429,
+          "ee": 0.014710946906217087,
+          "p": 0.006826574955946309,
+          "efecte_relatiu": -0.03901442115753295
+        },
+        "mortalitat": {
+          "coef": -0.17122360794782082,
+          "ee": 0.07992659680140164,
+          "p": 0.032172508672114554,
+          "rao_de_riscos": 0.8426331329383825
+        }
+      },
+      "ajust": {
+        "creixement": {
+          "coeficients": {
+            "Intercept": 1.9678403965368685,
+            "lnd": -0.1349691455178053,
+            "dbh": -0.007278394879621351,
+            "bal_l": -0.03804083252154555,
+            "lnab": -0.08533397049707954,
+            "alt": 0.061246831191191606,
+            "p34": -0.03979587653186429
+          },
+          "ee": {
+            "Intercept": 0.16965212273516725,
+            "lnd": 0.05120420405858359,
+            "dbh": 0.0017046472971302623,
+            "bal_l": 0.0028248345078273353,
+            "lnab": 0.021215745719094705,
+            "alt": 0.06482433026553826,
+            "p34": 0.014710946906217087
+          },
+          "p": {
+            "Intercept": 4.156191207589998e-31,
+            "lnd": 0.00839145344220725,
+            "dbh": 1.9570398701894664e-05,
+            "bal_l": 2.4603138114770245e-41,
+            "lnab": 5.765708922472143e-05,
+            "alt": 0.3447546590768633,
+            "p34": 0.006826574955946309
+          },
+          "sigma_u": 0.197732694364889,
+          "sigma_e": 0.4562714444111607,
+          "convergit": true
+        },
+        "mortalitat": {
+          "coeficients": {
+            "Intercept": -6.4649254640436045,
+            "inv_d": 5.97135958068611,
+            "dbh": 0.03247954801514659,
+            "bal": 0.02395856954263712,
+            "p34": -0.17122360794782082
+          },
+          "ee": {
+            "Intercept": 0.2642694567378266,
+            "inv_d": 2.9833624780133343,
+            "dbh": 0.004768358519934516,
+            "bal": 0.003548794762253993,
+            "p34": 0.07992659680140164
+          },
+          "p": {
+            "Intercept": 3.625515670512039e-132,
+            "inv_d": 0.04533277540514499,
+            "dbh": 9.660404979119194e-12,
+            "bal": 1.4664259282261365e-11,
+            "p34": 0.032172508672114554
+          },
+          "convergit": true
+        }
+      },
       "calibratge": {
-        "arbres": 5751,
-        "parceles": 355,
-        "morts": 432,
+        "arbres": 8057,
+        "parceles": 350,
+        "morts": 661,
+        "arbres_creixement": 7369,
+        "anys_min": 11,
+        "anys_max": 15,
         "altitud_min": 900.0,
         "altitud_max": 2400.0,
-        "ab_max": 58.0024
+        "ab_max": 73.1193,
+        "parceles_dos_periodes": 105,
+        "comarques": [
+          "Alt Urgell",
+          "Alta Ribagorça",
+          "Cerdanya",
+          "Pallars Sobirà"
+        ],
+        "per_periode": {
+          "IFN2-IFN3": {
+            "arbres": 4709,
+            "parceles": 286,
+            "morts": 377,
+            "arbres_creixement": 4319,
+            "anys_min": 11,
+            "anys_max": 12
+          },
+          "IFN3-IFN4": {
+            "arbres": 3348,
+            "parceles": 169,
+            "morts": 284,
+            "arbres_creixement": 3050,
+            "anys_min": 13,
+            "anys_max": 15
+          }
+        }
       },
       "validacio": {
         "creixement": {
-          "n": 5302,
-          "biaix": 8.858071216297509e-05,
-          "rmse": 0.1464464383333794,
-          "r2": 0.142365716041028,
-          "mitjana_observada": 0.21303093172387783
+          "n": 7369,
+          "biaix": 1.4563329313251113e-05,
+          "rmse": 0.13850957574394887,
+          "r2": 0.12622727067723927,
+          "mitjana_observada": 0.1997298276563984
         },
         "mortalitat": {
-          "n": 5751,
-          "auc": 0.5887552397763434,
-          "morts_observats": 432,
-          "morts_predits": 433.9295463681965
+          "n": 8057,
+          "auc": 0.5860451002259061,
+          "morts_observats": 661,
+          "morts_predits": 660.5506739419477
         },
         "parceles": {
-          "n": 249,
-          "biaix": -0.1535871485943777,
-          "rmse": 2.9172950371973396,
-          "r2": 0.9508875959684387,
-          "mitjana_observada": 21.537921285140563
+          "n": 307,
+          "biaix": -0.16264234527687293,
+          "rmse": 3.5259139540920788,
+          "r2": 0.9356169362960413,
+          "mitjana_observada": 23.747898697068404
+        },
+        "increment_ab_parceles": {
+          "n": 307,
+          "biaix": -0.16264234527687293,
+          "rmse": 3.5259139540920788,
+          "r2": 0.336224993866467,
+          "mitjana_observada": 2.77338664495114
         },
         "comparacio_informe": [
           {
             "ab_min": 0.0,
             "ab_max": 20.0,
-            "arbres": 1667,
-            "model_sobre_observat": 0.9590539718931393,
-            "informe_sobre_observat": 1.3476159357349682
+            "arbres": 1850,
+            "model_sobre_observat": 0.946456220472717,
+            "informe_sobre_observat": 1.3486635643534077
           },
           {
             "ab_min": 20.0,
             "ab_max": 30.0,
-            "arbres": 1531,
-            "model_sobre_observat": 0.9403673559416875,
-            "informe_sobre_observat": 1.6263567221589939
+            "arbres": 1963,
+            "model_sobre_observat": 0.9335185605284695,
+            "informe_sobre_observat": 1.6416400345289228
           },
           {
             "ab_min": 30.0,
             "ab_max": 40.0,
-            "arbres": 1186,
-            "model_sobre_observat": 1.0144115569270706,
-            "informe_sobre_observat": 2.0592764196164697
+            "arbres": 1851,
+            "model_sobre_observat": 1.0504824517180782,
+            "informe_sobre_observat": 2.19659430240829
           },
           {
             "ab_min": 40.0,
             "ab_max": 100.0,
-            "arbres": 935,
-            "model_sobre_observat": 0.9896248178509436,
-            "informe_sobre_observat": 2.391019817508977
+            "arbres": 1732,
+            "model_sobre_observat": 0.9800208844865568,
+            "informe_sobre_observat": 2.3654481689918923
           }
         ],
-        "increment_ab_parceles": {
-          "n": 249,
-          "biaix": -0.15358714859437766,
-          "rmse": 2.9172950371973396,
-          "r2": 0.4094591289425712,
-          "mitjana_observada": 2.814282329317269
+        "per_periode": {
+          "IFN2-IFN3": {
+            "creixement": {
+              "n": 4319,
+              "biaix": 0.0024890906035603855,
+              "rmse": 0.14581987667640373,
+              "r2": 0.12890910745295958,
+              "mitjana_observada": 0.21032820097244734
+            },
+            "mortalitat": {
+              "n": 4709,
+              "auc": 0.570575582121575,
+              "morts_observats": 377,
+              "morts_predits": 375.96709497423996
+            },
+            "parceles": {
+              "n": 200,
+              "biaix": -0.0226605,
+              "rmse": 3.0474653373336342,
+              "r2": 0.9489478322244278,
+              "mitjana_observada": 21.485660499999998
+            },
+            "increment_ab_parceles": {
+              "n": 200,
+              "biaix": -0.0226605,
+              "rmse": 3.0474653373336342,
+              "r2": 0.3079776063459676,
+              "mitjana_observada": 2.6109259999999996
+            },
+            "comparacio_informe": [
+              {
+                "ab_min": 0.0,
+                "ab_max": 20.0,
+                "arbres": 1346,
+                "model_sobre_observat": 0.9607494455199602,
+                "informe_sobre_observat": 1.3678924635883996
+              },
+              {
+                "ab_min": 20.0,
+                "ab_max": 30.0,
+                "arbres": 1154,
+                "model_sobre_observat": 0.9374633086004776,
+                "informe_sobre_observat": 1.597017829830524
+              },
+              {
+                "ab_min": 30.0,
+                "ab_max": 40.0,
+                "arbres": 1010,
+                "model_sobre_observat": 1.0450628194550773,
+                "informe_sobre_observat": 2.0470260255729986
+              },
+              {
+                "ab_min": 40.0,
+                "ab_max": 100.0,
+                "arbres": 822,
+                "model_sobre_observat": 1.0204438971988605,
+                "informe_sobre_observat": 2.428553815000853
+              }
+            ]
+          },
+          "IFN3-IFN4": {
+            "creixement": {
+              "n": 3050,
+              "biaix": -0.0034895295551042476,
+              "rmse": 0.12744238827044108,
+              "r2": 0.10255034903756222,
+              "mitjana_observada": 0.18472183606557377
+            },
+            "mortalitat": {
+              "n": 3348,
+              "auc": 0.6054143069907696,
+              "morts_observats": 284,
+              "morts_predits": 284.5835789677077
+            },
+            "parceles": {
+              "n": 107,
+              "biaix": -0.4242906542056076,
+              "rmse": 4.279090928360552,
+              "r2": 0.9018467283298648,
+              "mitjana_observada": 27.97638130841121
+            },
+            "increment_ab_parceles": {
+              "n": 107,
+              "biaix": -0.4242906542056076,
+              "rmse": 4.279090928360552,
+              "r2": 0.35778168543789735,
+              "mitjana_observada": 3.077051401869158
+            },
+            "comparacio_informe": [
+              {
+                "ab_min": 0.0,
+                "ab_max": 20.0,
+                "arbres": 504,
+                "model_sobre_observat": 0.9061861708122717,
+                "informe_sobre_observat": 1.2944876366289522
+              },
+              {
+                "ab_min": 20.0,
+                "ab_max": 30.0,
+                "arbres": 809,
+                "model_sobre_observat": 0.9278319261446998,
+                "informe_sobre_observat": 1.7059661103354244
+              },
+              {
+                "ab_min": 30.0,
+                "ab_max": 40.0,
+                "arbres": 841,
+                "model_sobre_observat": 1.0574447289056188,
+                "informe_sobre_observat": 2.3887357155626794
+              },
+              {
+                "ab_min": 40.0,
+                "ab_max": 100.0,
+                "arbres": 910,
+                "model_sobre_observat": 0.94208799532417,
+                "informe_sobre_observat": 2.3062299337600067
+              }
+            ]
+          }
         }
       }
     }

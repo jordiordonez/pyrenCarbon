@@ -3,3 +3,7 @@ statsmodels>=0.14
 scikit-learn>=1.5
 dbfread>=2.0
 pytest>=8.0
+# Només per a scripts/assignar_comarca.py
+shapely>=2.0
+pyshp>=2.3
+pyproj>=3.6
